@@ -1,0 +1,25 @@
+# LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+*.synctex(busy)
+*.fls
+*.fdb_latexmk
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.run.xml
+*.bcf
+
+# PDF output (取消注释下一行如果想忽略 PDF)
+# *.pdf
+
+# OS files
+Thumbs.db
+.DS_Store

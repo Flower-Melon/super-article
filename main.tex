@@ -1,0 +1,77 @@
+% !TEX program = xelatex
+% ============================================================
+%  期刊论文主文件
+% ============================================================
+\documentclass[a4paper,12pt]{article}
+
+% ------------------ 中文支持 ------------------
+\usepackage[UTF8]{ctex}
+
+% ------------------ 基础包 ------------------
+\usepackage{amsmath,amssymb,amsfonts}    % 数学
+\usepackage{graphicx}                    % 图片
+\usepackage{booktabs}                    % 三线表
+\usepackage{hyperref}                    % 超链接
+\usepackage{geometry}                    % 页面边距
+\geometry{a4paper, margin=2.5cm}
+
+% ------------------ 引用 ------------------
+\usepackage[numbers,sort&compress]{natbib}  % 参考文献风格
+
+% ------------------ 其他常用包 ------------------
+\usepackage{caption}                     % 图表标题
+\usepackage{subcaption}                  % 子图
+\usepackage{enumitem}                    % 列表定制
+\usepackage{xcolor}                      % 颜色
+\usepackage{cleveref}                    % 智能引用 \cref
+
+% ------------------ 文档信息 ------------------
+\title{在此输入论文标题}
+\author{作者1\thanks{电子邮件：author1@example.com} \\
+        单位名称，城市，邮编，国家 \\
+        \and
+        作者2 \\
+        单位名称，城市，邮编，国家}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    在此输入摘要。摘要应简要概述研究背景、目的、方法、主要结果和结论，
+    一般不超过300字（或遵循目标期刊的具体要求）。
+
+    \textbf{关键词：} 关键词1；关键词2；关键词3；关键词4
+\end{abstract}
+
+% ============================================================
+%  正文内容（使用 \input 分节管理）
+% ============================================================
+
+\input{sections/01-introduction}
+\input{sections/02-related-work}
+\input{sections/03-method}
+\input{sections/04-experiments}
+\input{sections/05-conclusion}
+
+% ============================================================
+%  参考文献
+% ============================================================
+
+% 如果你最终确定使用 bibtex：
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+% 如果你更习惯手动写文献条目（thebibliography），切换为：
+% \begin{thebibliography}{99}
+%     \bibitem{key1} ...
+% \end{thebibliography}
+
+% ============================================================
+%  附录（可选）
+% ============================================================
+% \appendix
+% \input{sections/appendix}
+
+\end{document}
