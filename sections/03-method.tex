@@ -1,6 +1,177 @@
 % !TEX root = ../main.tex
-\section{方法}
+\section{Method}
 
-在此描述你的方法。
+\subsection{System Overview}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{figures/system}
+    \caption{Overview of the proposed system.}
+    \label{fig:method-overview}
+\end{figure}
+
+Central to the proposed system is the separation between initial mission generation,
+independent plan checking, runtime adaptation, and experience reuse.
+The system takes aerial fire imagery as the initial input and produces
+an executable mission plan for a multi-UAV fleet.
+The main planning pipeline contains three modules:
+Vision Analysis, Mission Planning, and Validation.
+A Runtime Replanning module operates outside the pipeline and adjusts the plan
+when unexpected events occur during execution.
+Two memory modules, Episodic Memory and Lesson Memory, supply past experience
+to the planning and replanning modules.
+Figure~\ref{fig:method-overview} shows this overall structure.
+
+\paragraph{Vision Analysis.} Vision Analysis converts raw aerial imagery
+into a structured description of the fire situation.
+This module uses a multimodal LLM to perform two tasks in a single inference pass.
+First, it detects all visible fire points in the image and outputs their normalized coordinates.
+Second, it clusters these points by spatial density, partitioning the continuous fire field
+into several discrete task zones.
+
+This module uses a multimodal LLM rather than a vision-only model because zone division
+depends on more than fire point locations.
+The division also depends on visual context, such as smoke, vegetation,
+and terrain boundaries.
+These cues require joint reasoning over appearance and spatial semantics.
+
+\paragraph{Mission Planning.} Mission Planning is the core decision module.
+It converts the structured fire situation produced by Vision Analysis into an executable
+multi-UAV collaborative plan. A planning LLM generates a complete task chain for each
+UAV in the fleet, covering task allocation, temporal sequencing, and endurance management.
+To keep outputs controllable, the LLM is restricted to a predefined set of allowable actions.
+
+Mission Planning combines the fire situation, retrieved experience,
+and operational constraints.
+It receives the structured fire situation from Vision Analysis,
+retrieves relevant past cases and lessons from both memory modules,
+and produces a coordinated plan in which each UAV's task chain respects
+the fleet's capabilities and the mission's operational constraints.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/prompt}
+    \caption{The prompt template used by the Mission Planning module.}
+    \label{fig:planning-prompt}
+\end{figure}
+
+The prompt template for the planning LLM is shown in Figure~\ref{fig:planning-prompt}.
+
+\paragraph{Validation.} The Validation module assesses each candidate plan through
+two sequential checks. Together, the two checks form the audit--correction loop:
+when either one rejects a plan, its feedback is routed back to Mission Planning for revision.
+This loop turns validation failures into targeted feedback for the next planning attempt.
+
+The first check, Semantic Validation, uses an independent LLM to evaluate the plan
+from a tactical rationality perspective. It examines zone coverage completeness,
+resource-task matching, payload adequacy, and overall strategic health.
+Using a separate LLM rather than asking the planning LLM to self-check
+avoids self-consistency bias.
+
+The second check, Deterministic Rule Validation, uses a rule engine to verify
+structural legality, including UAV existence, coordinate validity, and task chain
+completeness. Unlike the semantic check, this rule check asks whether the plan
+is structurally legal.
+This question can be answered deterministically within the defined rule set.
+
+
+\paragraph{Runtime Replanning.} This module handles unexpected events during mission execution.
+It takes a runtime state snapshot as input, including current positions, battery levels,
+payloads, and task progress for each UAV.
+Its output is not a new global plan, but a local revision of the current plan.
+Unlike the main pipeline, Runtime Replanning reasons about a dynamic execution state and
+changes only the affected part of the plan.
+
+When a replanning event occurs, the module retrieves similar fault scenarios
+from Episodic Memory as repair references.
+These cases describe how comparable failures were resolved in past missions,
+providing the replanning LLM with tactical precedents for the current situation.
+
+\paragraph{Memory System.} The Memory System allows the system to reuse past experience.
+The two memory modules differ in what they store and how their contents are used.
+
+Episodic Memory stores concrete successful cases as input--output pairs.
+Each case records the situation, the generated or revised plan,
+and the corresponding outcome.
+Cases are indexed by situational features, so that when a new scenario arises,
+the system retrieves the most similar past cases as tactical references.
+
+Lesson Memory serves a different role. Instead of storing concrete cases,
+it keeps higher-level lessons distilled from every run.
+After each mission, an LLM reviews the full execution trace.
+The trace includes the initial plan, validation feedback, runtime events,
+replanning actions, and final scores.
+The LLM then extracts concise, reusable lessons.
+These lessons capture patterns such as common planning mistakes, resource estimation biases,
+and effective repair strategies.
+
+\subsection{Benchmark Design}
+
+To evaluate the system described above, we design a benchmark for
+UAV-assisted forest fire rescue.
+The benchmark targets closed-loop decision-making along a continuous chain:
+aerial fire situation analysis,
+resource-constrained mission planning, and runtime replanning.
+This chain captures the full decision workflow, from raw aerial imagery
+to an executable and adaptable multi-UAV plan.
+The task is broader than fire detection alone.
+It is also broader than task allocation alone.
+A model must handle this full decision chain within a single
+evaluation instance.
+
+Existing benchmarks only partially cover this full decision chain.
+Vision benchmarks cover aerial objects, fire, and smoke.
+They usually focus on detection, tracking, classification, or segmentation
+\cite{xia2018dota,zhu2022visdrone,mowla2024uavsffdb,shamsoshoara2021flame,han2024msfsdb}.
+They stop at visual understanding and do not evaluate downstream rescue decisions.
+Some benchmarks move beyond perception.
+Wildfire VQA and disaster-oriented multi-agent benchmarks evaluate multimodal reasoning,
+task allocation, path planning, or coordinated response
+\cite{habibpour2026wildfirevqa,kleiner2013rmasbench}.
+However, these capabilities are still tested separately.
+They are not coupled into a single rescue loop.
+A complete evaluation loop would couple forest fire perception
+with disaster semantics, UAV-level constraints and runtime replanning. 
+Crisis-response benchmarks mainly focus on text-based situational assessment and 
+humanitarian information classification, supporting macro-level awareness 
+but not fine-grained UAV task execution \cite{alam2021crisisbench}. 
+This creates a mismatch between existing evaluation settings
+and the closed-loop rescue process targeted in this work.
+Table~\ref{tab:benchmark_comparison} summarizes this comparison
+across four capability dimensions.
+
+\input{tables/benchmark-comparison}
+
+To close this gap, we design a benchmark that covers the full decision chain.
+The resulting benchmark has three design properties.
+First, it is sim-to-real informed.
+Real UAV parameters constrain every scenario, so the test conditions
+reflect actual engineering limits rather than arbitrary simulation settings.
+Second, it is scenario-engineered.
+Each test instance targets a specific decision capability.
+% Third, it serves as a stress-testing protocol.
+% Difficulty is controlled through engineering variables
+% to systematically expose model weaknesses.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/UAV}
+    \caption{UAV platform and its main components:(a) LiDAR, 
+    (b) frame, (c) monocular camera, (d) motor, (e) receiver, 
+    (f) onboard computer, (g) power supply, 
+    (h) stereo camera, and (i) flight controller.}
+    \label{fig:UAV-platform}
+\end{figure}
+
+\paragraph{(1) Sim-to-Real Informed Co-design.}
+The sim-to-real informed property is realized through a co-design between
+real UAV platforms and the AirSim simulation environment.
+The UAV side defines the engineering boundary within which any rescue mission must operate.
+AirSim generates controllable, repeatable benchmark scenarios inside that boundary.
+Together, the two sides turn ``sim-to-real informed'' from a conceptual claim
+into a concrete generation mechanism.
+The real UAV platform is shown in Figure~\ref{fig:UAV-platform}.
+
+The real UAV platform contributes several categories of engineering constraints.
 
 \endinput
