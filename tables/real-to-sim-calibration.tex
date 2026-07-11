@@ -1,0 +1,37 @@
+\begin{table*}[t]
+    \centering
+    \caption{Real-to-sim calibration of AirSim UAV and environment settings.}
+    \label{tab:real_to_sim_calibration}
+    \footnotesize
+    \setlength{\tabcolsep}{5pt}
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabularx}{\textwidth}{
+        @{}
+        >{\raggedright\arraybackslash}p{2.7cm}
+        >{\raggedright\arraybackslash}p{4.4cm}
+        >{\raggedright\arraybackslash}X
+        @{}
+    }
+        \toprule
+        \textbf{Calibration target} &
+        \textbf{Real-platform basis} &
+        \textbf{AirSim configuration} \\
+        \midrule
+        Imaging geometry &
+        Operating altitude and the RGB-D camera field of view and resolution &
+        Observation height $h$, camera pose, field of view, and resolution; the resulting footprint $W(h)$ and GSD determine the observable ground area and image scale. \\
+
+        Energy model &
+        Battery capacity, propulsion characteristics, and return-to-base reserve policy &
+        Available energy $e_{\mathrm{avail}}$, reserve $e_{\mathrm{res}}$, and energy consumption for flight and task execution. \\
+
+        Payload model &
+        Airframe and propulsion payload limit &
+        Maximum payload $m_{\max}$ and the onboard suppressant inventory for each simulated UAV. \\
+
+        Communication model &
+        Deployed communication configuration and operating range &
+        Link-distance threshold $d_{\mathrm{link}}$ and the distance-dependent connectivity condition. \\
+        \bottomrule
+    \end{tabularx}
+\end{table*}

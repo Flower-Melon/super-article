@@ -1,0 +1,43 @@
+\begin{table}[htbp]
+    \centering
+    \caption{Four progressive stress-testing regimes and their controlled scenario conditions.}
+    \label{tab:scenario-controls}
+    \footnotesize
+    \setlength{\tabcolsep}{4.5pt}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{
+        @{}
+        >{\raggedright\arraybackslash}p{1.5cm}
+        >{\raggedright\arraybackslash}X
+        >{\raggedright\arraybackslash}X
+        >{\raggedright\arraybackslash}X
+        @{}
+    }
+        \toprule
+        \textbf{Regime} &
+        \textbf{Fire-risk configuration} &
+        \textbf{Fleet/resource conditions} &
+        \textbf{Dynamic conditions} \\
+        \midrule
+        Simple &
+        Sparse static fire-risk elements; few risk regions. &
+        Ample energy and payload. &
+        None. \\
+
+        Normal &
+        Multiple fire-risk elements and risk regions. &
+        Multi-UAV allocation; normal resource margin. &
+        None. \\
+
+        Hard &
+        Multi-region fire scene. &
+        Energy or payload constrained. &
+        Single perturbation. \\
+
+        Expert &
+        Dense or spreading fire-risk layout. &
+        Competing resource demands. &
+        Concurrent perturbations; communication degradation. \\
+        \bottomrule
+    \end{tabularx}
+\end{table}

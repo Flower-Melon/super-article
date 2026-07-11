@@ -1,7 +1,5 @@
 % !TEX root = ../main.tex
-\section{Method}
-
-\subsection{System Overview}
+\section{System Overview}
 
 \begin{figure}[htbp]
     \centering
@@ -105,7 +103,11 @@ The LLM then extracts concise, reusable lessons.
 These lessons capture patterns such as common planning mistakes, resource estimation biases,
 and effective repair strategies.
 
-\subsection{Benchmark Design}
+\section{Benchmark Design}
+
+Building on the proposed closed-loop rescue system, we design a benchmark that
+evaluates its perception, planning, and replanning capabilities under
+real-UAV-informed conditions.
 
 To evaluate the system described above, we design a benchmark for
 UAV-assisted forest fire rescue.
@@ -149,9 +151,9 @@ Real UAV parameters constrain every scenario, so the test conditions
 reflect actual engineering limits rather than arbitrary simulation settings.
 Second, it is scenario-engineered.
 Each test instance targets a specific decision capability.
-% Third, it serves as a stress-testing protocol.
-% Difficulty is controlled through engineering variables
-% to systematically expose model weaknesses.
+Third, it uses an explicit evaluation protocol.
+The protocol profiles model behavior along the closed-loop decision chain
+through multiple performance dimensions.
 
 \begin{figure}[htbp]
     \centering
@@ -163,15 +165,134 @@ Each test instance targets a specific decision capability.
     \label{fig:UAV-platform}
 \end{figure}
 
-\paragraph{(1) Sim-to-Real Informed Co-design.}
-The sim-to-real informed property is realized through a co-design between
-real UAV platforms and the AirSim simulation environment.
-The UAV side defines the engineering boundary within which any rescue mission must operate.
-AirSim generates controllable, repeatable benchmark scenarios inside that boundary.
-Together, the two sides turn ``sim-to-real informed'' from a conceptual claim
-into a concrete generation mechanism.
-The real UAV platform is shown in Figure~\ref{fig:UAV-platform}.
+\subsection{Real-to-Sim Calibration}
+The first design property is realized through a co-design between the real UAV
+platform and the AirSim simulation environment. As stated above, real UAV
+parameters constrain every scenario. Accordingly, the real platform defines the
+engineering boundary of the rescue mission, while AirSim configures controllable
+and repeatable scenarios within that boundary. Rather than treating the two as
+separate experimental settings, we use the real platform to define the feasible
+set from which AirSim configures each simulated UAV and its environment.
+For each UAV, the configured mission must satisfy
+\begin{equation}
+\mathcal{E}_{\mathrm{UAV}}=
+\left\{(h,v,m,e_{\mathrm{avail}},d)\;\middle|\;
+\begin{aligned}
+    h &\in \mathcal{H}_{\mathrm{safe}},\quad v \in \mathcal{V}_{\mathrm{safe}},\\
+    m &\leq m_{\max},\quad e_{\mathrm{req}}+e_{\mathrm{res}} \leq e_{\mathrm{avail}},\\
+    d &\leq d_{\mathrm{link}}
+\end{aligned}
+\right\},
+\label{eq:uav-envelope}
+\end{equation}
+where $h$, $v$, $m$, $e_{\mathrm{avail}}$, and $d$ denote flight altitude,
+velocity, payload mass, available energy, and distance to the coordination link. The safe altitude
+and velocity ranges are specified by the operating policy. The payload and energy
+bounds are grounded in the airframe, propulsion system, and battery; the energy
+reserve enforces a safe return; and the link bound is determined by the deployed
+communication configuration. Thus, the numerical bounds combine hardware
+specifications, flight-safety policy, and deployment configuration. Any
+configuration that violates
+Eq.~\ref{eq:uav-envelope} is excluded before scenario generation. The real UAV
+platform is shown in Figure~\ref{fig:UAV-platform}, and its hardware
+specifications are listed in Table~\ref{tab:real_uav_hardware}.
 
-The real UAV platform contributes several categories of engineering constraints.
+\input{tables/uav-hardware}
+
+The virtual observation process is further fixed by the real camera geometry.
+Under a nadir-view, locally planar-ground approximation, for altitude $h$,
+horizontal field of view $\theta_{\mathrm{FOV}}$, and horizontal
+resolution $N_x$, the image footprint and ground sampling distance are
+\begin{equation}
+W(h)=2h\tan\left(\frac{\theta_{\mathrm{FOV}}}{2}\right),\qquad
+\mathrm{GSD}(h)=\frac{W(h)}{N_x}.
+\label{eq:observation-geometry}
+\end{equation}
+Thus, the AirSim camera pose and the scale, density, and placement of fire-risk
+elements are jointly constrained by what the real camera could observe, rather
+than selected independently. Energy and payload limits likewise constrain route
+length, task duration, and suppressible workload. Table~\ref{tab:real_to_sim_calibration}
+records these calibration rules and the resulting simulation settings.
+
+\input{tables/real-to-sim-calibration}
+
+\subsection{Scenario Engineering}
+The second design property is that each benchmark instance is purpose-built
+rather than randomly sampled.
+Each instance is generated from a controlled rescue configuration that specifies
+the fire-risk layout, UAV states, mission constraints, and, when applicable, an
+event schedule.
+
+To make this construction systematic, each benchmark instance is represented
+as a structured rescue state $S=\{O,F,R,U,C,E\}$, maintained by the generator.
+Here, $O$ denotes aerial observations; $F$ fire-risk elements; $R$ risk regions;
+$U$ UAV operational states; $C$ mission constraints; and $E$ event-driven
+perturbations. Together, these elements define the rescue world but are not
+exposed to the model as a single input.
+
+The benchmark instead uses a stage-specific input--output format.
+At mission start, the model receives $X_0=\{O,U,C\}$.
+The fire-risk elements $F$ and risk regions $R$ are hidden annotations
+that the model must infer from the observation. When a runtime event occurs,
+the model receives the updated UAV state $U_t$ together with the event $E_t$.
+The required outputs are the predicted $F$ and $R$, an initial mission plan $P$,
+and, when applicable, a revised plan $P'$. Each instance carries hidden
+ground-truth annotations for $F$ and $R$ to define fire-risk targets, risk
+regions, and downstream task completion.
+This standardized format makes the benchmark reusable
+across different models and evaluation runs.
+
+Finally, instances are assigned to one of the four progressive stress-testing
+regimes summarized in Table~\ref{tab:scenario-controls}. At generation time,
+the regime is specified by the initial condition $X_0$ and, when dynamic
+conditions apply, a hidden event schedule $E$. Although $E$ is disclosed to the
+model only upon occurrence, it is fixed in advance to control the closed-loop
+difficulty of the instance. Each higher regime retains the requirements of lower
+regimes while adding perception, resource, or dynamic coordination pressure.
+
+\input{tables/scenario-controls}
+
+\subsection{Evaluation Protocol}
+The third design property is that the benchmark evaluates end-to-end model
+behavior along an explicit decision chain and through multi-dimensional metrics,
+rather than a single aggregated score. We formalize the decision chain as
+\[
+\begin{gathered}
+O \rightarrow F \rightarrow R,\qquad (R,U,C) \rightarrow P, \\
+(P,U_t,E_t) \rightarrow P'.
+\end{gathered}
+\]
+Each relation represents one stage of the closed-loop rescue process.
+$O \rightarrow F$ denotes fire-risk identification from aerial observations.
+$F \rightarrow R$ denotes the abstraction of discrete fire elements
+into coherent risk regions.
+$R, U, C \rightarrow P$ denotes plan generation
+from risk regions, UAV states, and mission constraints.
+$P, U_t, E_t \rightarrow P'$ denotes plan revision from the current UAV
+state under a runtime event.
+Each step in this chain corresponds to the capabilities
+provided by the system modules described in the System Overview.
+Rather than scoring each intermediate representation independently, the protocol
+evaluates whether the complete decision chain produces an effective executable
+mission.
+
+The protocol reports the six mission-level metrics in
+Table~\ref{tab:evaluation-metrics}.
+
+\input{tables/evaluation-metrics}
+
+All applicable mission-level metrics are reported both overall and for each of
+the four stress-testing regimes. Event stability is reported only for the Hard
+and Expert regimes, where dynamic events occur. This regime-wise reporting
+reveals whether a model fails under increasing perception, resource, or dynamic
+coordination pressure.
+
+Together, the structured scenario state and the evaluation protocol
+define what the benchmark measures and how.
+$S$ defines the rescue world the model must operate in, and the evaluation chain
+defines the capabilities it must demonstrate. The mission-level metrics provide
+a multi-dimensional profile of model behavior. Together with the structured
+scenarios and standard formats, they support reproducible evaluation and
+diagnostic comparison across models.
 
 \endinput
