@@ -1,0 +1,166 @@
+\section{Evaluation Suite Design}
+
+Existing datasets and evaluation settings only partially cover the closed-loop
+rescue decision chain defined in Section~3. Vision datasets cover aerial
+objects, fire, and smoke. They usually focus on detection, tracking,
+classification, or segmentation
+\cite{xia2018dota,zhu2022visdrone,mowla2024uavsffdb,shamsoshoara2021flame,han2024msfsdb}.
+They stop at visual understanding and do not evaluate downstream rescue decisions.
+Some evaluation settings move beyond perception.
+Wildfire VQA and disaster-oriented multi-agent benchmarks evaluate multimodal reasoning,
+task allocation, path planning, or coordinated response
+\cite{habibpour2026wildfirevqa,kleiner2013rmasbench}.
+However, these capabilities are generally tested in isolation rather than
+coupled into one rescue loop. Crisis-response benchmarks mainly focus on
+text-based situational assessment and humanitarian information classification,
+supporting macro-level awareness but not fine-grained UAV task execution
+\cite{alam2021crisisbench}. Consequently, existing settings do not jointly test
+the transition from aerial observation to fire-point detection and task-zone
+construction, resource-constrained fleet planning, and runtime replanning.
+Table~\ref{tab:benchmark_comparison} summarizes this comparison
+across four capability dimensions.
+
+\input{tables/benchmark-comparison}
+
+To close this gap, we instantiate the task model of Section~3 as a controlled,
+real-UAV-informed evaluation suite in AirSim. The suite evaluates whether a
+system can complete the full rescue loop within a single episode, from aerial
+fire-situation understanding to an executable plan and its adaptation after
+runtime perturbations. Its design combines three complementary elements.
+
+First, real-to-sim calibration constrains simulated platforms, sensing, and
+mission conditions by the capabilities and safety limits of a real UAV. The
+resulting scenarios are therefore physically and operationally grounded rather
+than arbitrarily configured. Second, difficulty stratification varies the
+complexity of fire-point layouts, fleet-resource conditions, and runtime perturbations
+while preserving a common task definition. It enables controlled comparison of
+models as closed-loop demands increase. Third, mission-level metrics assess the
+outcome of the complete rescue process from complementary operational
+perspectives, rather than collapsing performance into a single score. The
+following sections detail these three elements.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/UAV}
+    \caption{UAV platform and its main components:(a) LiDAR, 
+    (b) frame, (c) monocular camera, (d) motor, (e) receiver, 
+    (f) onboard computer, (g) power supply, 
+    (h) stereo camera, and (i) flight controller.}
+    \label{fig:UAV-platform}
+\end{figure}
+
+\subsection{Real-to-Sim Calibration}
+The first design property is realized through a co-design between the real UAV
+platform and the AirSim simulation environment. As stated above, real UAV
+parameters constrain every scenario. Accordingly, the real platform defines the
+engineering boundary of the rescue mission, while AirSim configures controllable
+and repeatable scenarios within that boundary. Rather than treating the two as
+separate experimental settings, we use the real platform to define the feasible
+set from which AirSim configures each simulated UAV and its environment.
+For each UAV, the configured mission must satisfy
+\begin{equation}
+\mathcal{E}_{\mathrm{UAV}}=
+\left\{(h,v,m,e_{\mathrm{avail}},d)\;\middle|\;
+\begin{aligned}
+    h &\in \mathcal{H}_{\mathrm{safe}},\quad v \in \mathcal{V}_{\mathrm{safe}},\\
+    m &\leq m_{\max},\quad e_{\mathrm{req}}+e_{\mathrm{res}} \leq e_{\mathrm{avail}},\\
+    d &\leq d_{\mathrm{link}}
+\end{aligned}
+\right\},
+\label{eq:uav-envelope}
+\end{equation}
+where $h$, $v$, $m$, $e_{\mathrm{avail}}$, and $d$ denote flight altitude,
+velocity, payload mass, available energy, and distance to the coordination link. The safe altitude
+and velocity ranges are specified by the operating policy. The payload and energy
+bounds are grounded in the airframe, propulsion system, and battery; the energy
+reserve enforces a safe return; and the link bound is determined by the deployed
+communication configuration. Thus, the numerical bounds combine hardware
+specifications, flight-safety policy, and deployment configuration. Any
+configuration that violates
+Eq.~\ref{eq:uav-envelope} is excluded before scenario generation. The real UAV
+platform is shown in Figure~\ref{fig:UAV-platform}, and its hardware
+specifications are listed in Table~\ref{tab:real_uav_hardware}.
+
+\input{tables/uav-hardware}
+
+The virtual observation process is further fixed by the real camera geometry.
+Under a nadir-view, locally planar-ground approximation, for altitude $h$,
+horizontal field of view $\theta_{\mathrm{FOV}}$, and horizontal
+resolution $N_x$, the image footprint and ground sampling distance are
+\begin{equation}
+W(h)=2h\tan\left(\frac{\theta_{\mathrm{FOV}}}{2}\right),\qquad
+\mathrm{GSD}(h)=\frac{W(h)}{N_x}.
+\label{eq:observation-geometry}
+\end{equation}
+Thus, the AirSim camera pose and the scale, density, and placement of fire
+points are jointly constrained by what the real camera could observe, rather
+than selected independently. Energy and payload limits likewise constrain route
+length, task duration, and suppressible workload. Table~\ref{tab:real_to_sim_calibration}
+records these calibration rules and the resulting simulation settings.
+
+\input{tables/real-to-sim-calibration}
+
+These calibrated bounds provide the common operational basis on which the
+difficulty levels are constructed.
+
+\subsection{Difficulty Stratification}
+The second design property is that each evaluation episode is purpose-built
+rather than randomly sampled.
+Each episode instantiates the task variables defined in Section~3 through three
+controlled dimensions: fleet and resource conditions, fire-point layouts, and,
+where applicable, runtime perturbations. Their combinations define four stress-testing difficulty levels in
+Table~\ref{tab:scenario-controls}.
+Each difficulty level is instantiated by a fixed set of 20 evaluation episodes, yielding
+80 episodes in total.
+
+\input{tables/scenario-controls}
+
+The fleet and resource conditions in every evaluation episode is constrained by the
+real-to-sim calibration in Section~4.1. In particular, each simulated UAV must
+satisfy the feasible operating envelope in Eq.~\ref{eq:uav-envelope}, and its
+imaging, energy, payload, and communication settings follow
+Table~\ref{tab:real_to_sim_calibration}. Difficulty is therefore varied only
+within the engineering and operational limits established for the real platform.
+
+The fire-point configuration of all episode is pre-specified rather than
+randomly generated. These configuration controls the scene structure
+and the spatial arrangement and number of fire points per task zone across
+difficulty levels.
+Figure~\ref{fig:difficulty-scene-examples} provides representative scenes from
+the four difficulty levels, and Figure~\ref{fig:fire-point-count-distribution} summarizes
+the distribution of fire-point counts per task zone within each difficulty level. Together,
+they illustrate the scene layouts and task-zone-level fire-point distributions
+used to instantiate the four difficulty levels.
+
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{figures/difficulty_scene_examples.png}
+    \caption{Representative fire scenes from the four difficulty levels.
+    In each example, \textit{Origin image} denotes the original aerial image,
+    and \textit{Perception result} denotes the output generated by the Vision
+    Analysis module, which uses Gemini~3.1 Pro as its foundation model.}
+    \label{fig:difficulty-scene-examples}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/fire_point_count_distribution.png}
+    \caption{Distribution of fire-point counts per task zone across difficulty
+    levels.}
+    \label{fig:fire-point-count-distribution}
+\end{figure}
+
+\subsection{Evaluation Metrics}
+The third design property is an explicit, multi-dimensional assessment of
+end-to-end behavior on the task defined in Section~3. Rather than reducing the
+closed-loop rescue process to a single aggregated score, the evaluation reports
+the six mission-level metrics in Table~\ref{tab:evaluation-metrics}. Together,
+these metrics assess whether the system completes rescue objectives promptly,
+uses fleet resources responsibly, and maintains coordinated operation when
+conditions change.
+
+\input{tables/evaluation-metrics}
+
+\endinput

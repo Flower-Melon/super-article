@@ -1,0 +1,149 @@
+\section{Task Modeling and System Design}
+
+\subsection{Task Modeling}
+
+Forest-fire rescue is a closed-loop decision task rather than an isolated
+perception or allocation problem. In an operational mission, aerial observations
+first reveal dispersed fire points; these points must then be organized into
+actionable task zones. The fleet must allocate its limited energy,
+payload, and flight time to these regions, while unexpected failures or changes
+in the fire situation may require the current plan to be revised during
+execution. We therefore abstract the real rescue workflow as a sequence from
+situation understanding to resource-constrained planning and runtime adaptation.
+
+For each mission, the rescue world is represented by the structured state
+\[
+S=\{O,F,R,U,C,E\}.
+\]
+Here, $O$ denotes aerial observations; $F$ denotes fire points; $R$ denotes
+task zones; $U$ denotes UAV operational states; $C$ denotes mission constraints;
+and $E$ denotes runtime perturbations. This representation
+separates the underlying rescue world from the information available to the
+decision system. At mission start, the system receives $X_0=\{O,U,C\}$,
+whereas $F$ and $R$ must be inferred from the observation. When a runtime
+perturbation occurs, it receives the updated operational state $U_t$ and the
+observed perturbation $E_t$. The required outputs are an initial mission plan
+$P$ and, when necessary, a revised plan $P'$.
+
+The resulting task model comprises the following decision chain:
+\[
+\begin{gathered}
+O \rightarrow F \rightarrow R,\qquad (R,U,C) \rightarrow P, \\
+(P,U_t,E_t) \rightarrow P'.
+\end{gathered}
+\]
+The first two relations transform raw aerial observations into an actionable
+regional representation of the fire situation. The third relation generates an
+executable fleet plan under operational constraints. The final relation adapts
+that plan to changes encountered during execution. This formulation captures
+the continuous rescue workflow while retaining the stage-specific information
+needed to design and evaluate a closed-loop system.
+
+\subsection{System Overview}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{figures/system}
+    \caption{Overview of the proposed system.}
+    \label{fig:method-overview}
+\end{figure}
+
+Based on the task model above, the proposed system separates initial mission generation,
+independent plan checking, runtime adaptation, and experience reuse.
+The system takes aerial fire imagery as the initial input and produces
+an executable mission plan for a multi-UAV fleet.
+The main planning pipeline contains three modules:
+Vision Analysis, Mission Planning, and Validation.
+A Runtime Replanning module operates outside the pipeline and adjusts the plan
+when unexpected events occur during execution.
+Two memory modules, Episodic Memory and Lesson Memory, supply past experience
+to the planning and replanning modules.
+Figure~\ref{fig:method-overview} shows the resulting architecture. Vision Analysis
+implements the transformation from observations to fire points and task zones;
+Mission Planning maps task zones, fleet states, and constraints to an initial plan;
+and Runtime Replanning produces local revisions after runtime perturbations.
+
+\paragraph{Vision Analysis.} Vision Analysis converts raw aerial imagery
+into a structured description of the fire situation.
+This module uses a multimodal LLM to perform two tasks in a single inference pass.
+First, it detects all visible fire points in the image and outputs their normalized coordinates.
+Second, it clusters these points by spatial density, partitioning the continuous fire field
+into several discrete task zones.
+
+This module uses a multimodal LLM rather than a vision-only model because zone division
+depends on more than fire point locations.
+The division also depends on visual context, such as smoke, vegetation,
+and terrain boundaries.
+These cues require joint reasoning over appearance and spatial semantics.
+
+\paragraph{Mission Planning.} Mission Planning is the core decision module.
+It converts the structured fire situation produced by Vision Analysis into an executable
+multi-UAV collaborative plan. A planning LLM generates a complete task chain for each
+UAV in the fleet, covering task allocation, temporal sequencing, and endurance management.
+To keep outputs controllable, the LLM is restricted to a predefined set of allowable actions.
+
+Mission Planning combines the fire situation, retrieved experience,
+and operational constraints.
+It receives the structured fire situation from Vision Analysis,
+retrieves relevant past cases and lessons from both memory modules,
+and produces a coordinated plan in which each UAV's task chain respects
+the fleet's capabilities and the mission's operational constraints.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/prompt}
+    \caption{The prompt template used by the Mission Planning module.}
+    \label{fig:planning-prompt}
+\end{figure}
+
+The prompt template for the planning LLM is shown in Figure~\ref{fig:planning-prompt}.
+
+\paragraph{Validation.} The Validation module assesses each candidate plan through
+two sequential checks. Together, the two checks form the audit--correction loop:
+when either one rejects a plan, its feedback is routed back to Mission Planning for revision.
+This loop turns validation failures into targeted feedback for the next planning attempt.
+
+The first check, Semantic Validation, uses an independent LLM to evaluate the plan
+from a tactical rationality perspective. It examines zone coverage completeness,
+resource-task matching, payload adequacy, and overall strategic health.
+Using a separate LLM rather than asking the planning LLM to self-check
+avoids self-consistency bias.
+
+The second check, Deterministic Rule Validation, uses a rule engine to verify
+structural legality, including UAV existence, coordinate validity, and task chain
+completeness. Unlike the semantic check, this rule check asks whether the plan
+is structurally legal.
+This question can be answered deterministically within the defined rule set.
+
+
+\paragraph{Runtime Replanning.} This module handles runtime perturbations during mission execution.
+It takes a runtime state snapshot as input, including current positions, battery levels,
+payloads, and task progress for each UAV.
+Its output is not a new global plan, but a local revision of the current plan.
+Unlike the main pipeline, Runtime Replanning reasons about a dynamic execution state and
+changes only the affected part of the plan.
+
+When a runtime perturbation occurs, the module retrieves similar fault scenarios
+from Episodic Memory as repair references.
+These cases describe how comparable failures were resolved in past missions,
+providing the replanning LLM with tactical precedents for the current situation.
+
+\paragraph{Memory System.} The Memory System allows the system to reuse past experience.
+The two memory modules differ in what they store and how their contents are used.
+
+Episodic Memory stores concrete successful cases as input--output pairs.
+Each case records the situation, the generated or revised plan,
+and the corresponding outcome.
+Cases are indexed by situational features, so that when a new scenario arises,
+the system retrieves the most similar past cases as tactical references.
+
+Lesson Memory serves a different role. Instead of storing concrete cases,
+it keeps higher-level lessons distilled from every run.
+After each mission, an LLM reviews the full execution trace.
+The trace includes the initial plan, validation feedback, runtime perturbations,
+replanning actions, and final scores.
+The LLM then extracts concise, reusable lessons.
+These lessons capture patterns such as common planning mistakes, resource estimation biases,
+and effective repair strategies.
+
+\endinput

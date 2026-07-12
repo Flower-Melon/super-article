@@ -1,0 +1,28 @@
+% !TEX root = ../main.tex
+\section{Experiments}
+
+\subsection{Experimental Setup}
+
+We evaluate the proposed system using the evaluation suite described in
+Section~4. The experiments assess its end-to-end performance under controlled
+mission conditions of varying difficulty levels.
+
+To isolate the influence of the foundation model on plan generation,
+validation, and runtime adaptation, we fix Gemini~3.1~Pro as the foundation
+model for Vision Analysis in all experiments. We then evaluate four
+configurations by using ChatGPT~5.5, Gemini~3.1~Pro, Claude~Opus~4.7, and
+DeepSeek~V4~Pro, respectively, in the remaining LLM-based modules. This design
+keeps the transformation from aerial imagery to the structured fire situation
+consistent across configurations, allowing their subsequent differences to
+reflect the models used in Mission Planning, Semantic Validation, and Runtime
+Replanning.
+
+\subsection{Main Results}
+
+Present and analyze the main experimental results.
+
+\subsection{Ablation Studies}
+
+Analyze the contribution of individual components.
+
+\endinput
