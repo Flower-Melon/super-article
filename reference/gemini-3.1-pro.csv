@@ -1,0 +1,5 @@
+difficulty,total_score_mean,difficulty_pressure_mean,sub_completion_mean,sub_response_mean,sub_time_mean,sub_event_stability_mean,sub_resource_pressure_mean,sub_coordination_mean
+simple,93.23,0.0289,100.0,88.775,91.055,100.0,84.45,80.705
+normal,88.225,0.1576,100.0,94.095,71.5,100.0,86.675,71.715
+hard,62.805,0.5995,100.0,92.58,39.595,33.75,59.095,60.65
+expert,38.2818,0.8922,90.0909,61.3,12.0182,0.0,58.7182,55.8182

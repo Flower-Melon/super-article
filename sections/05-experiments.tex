@@ -4,25 +4,168 @@
 \subsection{Experimental Setup}
 
 We evaluate the proposed system using the evaluation suite described in
-Section~4. The experiments assess its end-to-end performance under controlled
-mission conditions of varying difficulty levels.
+Section~4. The experiments comprise two complementary settings. The first
+assesses the end-to-end system with different general-purpose foundation
+models under controlled mission conditions of varying difficulty. The second
+examines whether a compact model specialized with domain decision traces can
+replace the general-purpose model in Mission Planning.
 
 To isolate the influence of the foundation model on plan generation,
 validation, and runtime adaptation, we fix Gemini~3.1~Pro as the foundation
-model for Vision Analysis in all experiments. We then evaluate four
-configurations by using ChatGPT~5.5, Gemini~3.1~Pro, Claude~Opus~4.7, and
+model for Vision Analysis in the first setting. We then evaluate four
+configurations by using ChatGPT~5.5, Gemini~3.1~Pro, Claude~Sonnet~4.7, and
 DeepSeek~V4~Pro, respectively, in the remaining LLM-based modules. This design
 keeps the transformation from aerial imagery to the structured fire situation
 consistent across configurations, allowing their subsequent differences to
 reflect the models used in Mission Planning, Semantic Validation, and Runtime
-Replanning.
+Replanning. Each configuration is evaluated on the same 80 episodes, comprising
+20 episodes at each of the simple, normal, hard, and expert difficulty levels.
 
-\subsection{Main Results}
+For the second setting, we construct 2,000 mission-planning demonstrations
+using the proposed system with Gemini~3.1~Pro as the teacher model. The
+demonstrations are generated from scenarios disjoint from the 80 evaluation
+episodes. Each demonstration has the form
+\[
+(R,U,C) \rightarrow P,
+\]
+where each demonstration pairs a structured description of the task zones, UAV states,
+and mission constraints with the final multi-UAV plan accepted after the
+Semantic Validation and Deterministic Rule Validation loop. We use these
+validated demonstrations to specialize Qwen3-8B for the planning mapping
+defined in Section~3. The dataset is divided into 90\% for training and 10\%
+for validation. We apply 4-bit quantized low-rank adaptation with a maximum
+sequence length of 6,144 tokens. The model is trained for three epochs with an
+effective batch size of 16 and a learning rate of $5\times10^{-5}$. Fine-tuning
+is conducted on a single NVIDIA GeForce RTX~4090, with 16 Intel Xeon Gold~6430
+vCPUs and 120~GB of system memory.
 
-Present and analyze the main experimental results.
+We evaluate both the original and fine-tuned Qwen3-8B by replacing only the
+Mission Planning model. Vision Analysis and Semantic Validation continue to
+use Gemini~3.1~Pro, while Deterministic Rule Validation and all other non-LLM
+components remain unchanged. The two Qwen3-8B configurations are evaluated on
+the same 40 simple and normal episodes used in the first setting, with 20
+episodes at each level. Because these levels contain no runtime perturbations,
+this experiment does not invoke Runtime Replanning or assess event stability.
+The comparison therefore isolates the effect of planner fine-tuning on the
+same episode subset.
 
-\subsection{Ablation Studies}
+\subsection{Foundation Model Comparison}
 
-Analyze the contribution of individual components.
+Table~\ref{tab:main-results} summarizes the end-to-end results for all four
+foundation-model configurations and difficulty levels, while
+Figure~\ref{fig:model-total-score} provides a direct comparison of their
+overall scores. ChatGPT~5.5 achieves the highest overall score at every level,
+with scores of 94.45, 90.36, 66.09, and 41.15 from simple to expert,
+respectively. Its advantage is small in the simple setting but becomes more
+evident as the scenarios impose stronger temporal, event, and resource
+constraints. Averaged over the four difficulty levels, ChatGPT~5.5 obtains an
+overall score of 73.01, followed by Claude~Sonnet~4.7 (71.67),
+Gemini~3.1~Pro (70.64), and DeepSeek~V4~Pro (68.02). The consistent ordering
+in Figure~\ref{fig:model-total-score} indicates that the observed advantage is
+not tied to a single difficulty regime.
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/model-total-score.png}
+    \caption{Overall scores of the four foundation-model configurations across
+    scenario difficulty levels.}
+    \label{fig:model-total-score}
+\end{figure}
+
+\input{tables/main-results}
+
+All configurations complete nearly all objectives in the simple, normal, and
+hard settings, indicating that the proposed pipeline reliably converts the
+shared visual analysis into executable missions. The performance gap instead
+arises primarily from execution quality. In particular, ChatGPT~5.5 maintains
+the strongest response, resource-pressure, and coordination scores as
+difficulty increases. This suggests that its plans and runtime adaptations
+make more effective use of the available fleet rather than merely maximizing
+task completion.
+
+Figure~\ref{fig:model-performance-radar} further compares the six
+mission-level metrics. In the simple and normal settings, the model profiles
+largely overlap near the outer region of the plots, although differences in
+time efficiency and coordination are already visible. The profiles separate
+more clearly in the hard and expert settings, where ChatGPT~5.5 retains the
+largest and most balanced coverage. Claude~Sonnet~4.7 is generally the closest
+alternative, whereas Gemini~3.1~Pro and DeepSeek~V4~Pro show larger losses on
+coordination and time efficiency as scenario pressure increases.
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/model-performance-radar.png}
+    \caption{Mission-level performance profiles of the four foundation-model
+    configurations at each difficulty level. Larger radial values indicate
+    better performance.}
+    \label{fig:model-performance-radar}
+\end{figure}
+
+Increasing scenario difficulty nevertheless degrades every configuration.
+The most pronounced changes occur in mission time and event stability: time
+scores fall to 3.54--13.23 in expert scenarios, while event-stability scores
+fall to 0--2.67. By contrast, expert-level completion remains above 90 for all
+models. Thus, the principal challenge in the hardest scenarios is not whether
+the system can eventually address the rescue objectives, but whether it can do
+so efficiently while preserving mission continuity under repeated runtime
+perturbations. These results also expose clear headroom for more robust
+replanning and time-aware resource allocation.
+
+\subsection{Fine-Tuned Planner Evaluation}
+
+Table~\ref{tab:fine-tuned-planner-results} compares the Gemini~3.1~Pro
+teacher planner with the original and fine-tuned Qwen3-8B planners. Fine-tuning
+substantially improves the compact model on both difficulty levels. The overall
+score increases from 63.77 to 90.87 in the simple setting and from 67.19 to
+87.39 in the normal setting. Averaged over the two levels, fine-tuning yields
+an absolute gain of 23.65 points and raises Qwen3-8B to 98.24\% of the Gemini
+planner's average score.
+
+\input{tables/fine-tuned-planner-results}
+
+Figure~\ref{fig:planner-performance-radar} shows that the improvement extends
+across the mission-level performance profile. The original Qwen3-8B exhibits
+its largest deficits in mission time, resource pressure, and coordination,
+whereas fine-tuning substantially expands its profile toward that of
+Gemini~3.1~Pro. The fine-tuned planner restores near-complete task coverage and
+slightly exceeds Gemini~3.1~Pro in simple-level response and normal-level
+mission time and coordination. This indicates that the validated demonstrations
+transfer not only output-format compliance but also task-allocation and
+resource-management behavior to the smaller model.
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/2-performance-radar.png}
+    \caption{Mission-level performance profiles of the original Qwen3-8B,
+    fine-tuned Qwen3-8B, and Gemini~3.1~Pro planners in the simple and normal
+    settings. Larger radial values indicate better performance. Event stability
+    is not interpreted because these settings contain no runtime perturbations.}
+    \label{fig:planner-performance-radar}
+\end{figure}
+
+The fine-tuned planner also reduces planning overhead under the evaluated
+deployment setting. Its mean planning time across the two levels is 14.01~s,
+compared with 37.50~s for Gemini~3.1~Pro, while its mean planning-token usage
+falls from 13,353 to 3,593. At the individual difficulty levels, this
+corresponds to planning-time reductions of 61.3\% and 63.7\%, and token
+reductions of 70.3\% and 75.3\%, for simple and normal scenarios,
+respectively. Figure~\ref{fig:planner-score-efficiency} summarizes this
+performance--efficiency trade-off: fine-tuning closes most of the score gap to
+the teacher while reducing both planning latency and token usage. These results
+show that domain specialization enables Qwen3-8B to retain most of the teacher
+planner's mission performance while providing a more efficient locally
+deployable alternative for initial mission planning.
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/2-score-efficiency-summary.png}
+    \caption{Overall score and planning overhead of the three planners in the
+    simple and normal settings: (a) total score, (b) planning duration, and
+    (c) planning-token usage. Lower values are better for planning duration and
+    token usage.}
+    \label{fig:planner-score-efficiency}
+\end{figure}
+
+\FloatBarrier
 
 \endinput

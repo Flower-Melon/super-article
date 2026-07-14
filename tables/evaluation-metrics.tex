@@ -7,33 +7,31 @@
     \renewcommand{\arraystretch}{1.15}
     \begin{tabularx}{\textwidth}{
         @{}
-        >{\raggedright\arraybackslash}p{2.6cm}
-        >{\centering\arraybackslash}p{1.9cm}
+        >{\raggedright\arraybackslash}p{3.0cm}
         >{\raggedright\arraybackslash}X
         @{}
     }
         \toprule
         \textbf{Metric} &
-        \textbf{Direction} &
-        \textbf{Operational meaning} \\
+        \textbf{Evaluation focus} \\
         \midrule
-        Completion & $\uparrow$ &
-        Proportion of fire points or task zones successfully handled by the fleet. \\
+        Completion &
+        Successful handling of fire points or task zones by the fleet. \\
 
-        Response & $\downarrow$ &
-        Delay from fire detection to the start of effective intervention. \\
+        Response &
+        Timeliness of effective intervention after fire detection. \\
 
-        Mission time & $\downarrow$ &
-        Total duration from mission start to completion. \\
+        Mission time &
+        Efficiency in completing the full rescue mission. \\
 
-        Event stability & $\uparrow$ &
-        Mission continuity after perturbations, accounting for replanning and resupply interventions. \\
+        Event stability &
+        Mission continuity under runtime perturbations and replanning. \\
 
-        Resource pressure & $\downarrow$ &
-        Fleet energy consumption, maximum per-UAV energy use, and supply-request frequency. \\
+        Resource pressure &
+        Fleet-level and per-UAV resource consumption. \\
 
-        Coordination & $\uparrow$ &
-        Balance of task count, flight distance, and execution duration across UAVs. \\
+        Coordination &
+        Balance of workload, flight distance, and execution duration across UAVs. \\
         \bottomrule
     \end{tabularx}
 \end{table}

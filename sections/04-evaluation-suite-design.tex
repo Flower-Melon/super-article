@@ -132,7 +132,7 @@ the distribution of fire-point counts per task zone within each difficulty level
 they illustrate the scene layouts and task-zone-level fire-point distributions
 used to instantiate the four difficulty levels.
 
-
+\FloatBarrier
 
 \begin{figure}[htbp]
     \centering
@@ -152,15 +152,95 @@ used to instantiate the four difficulty levels.
     \label{fig:fire-point-count-distribution}
 \end{figure}
 
+\FloatBarrier
+
+The third controlled dimension introduces runtime perturbations after mission
+execution has begun. Unlike the preceding two dimensions, which specify the
+initial fleet state and fire scene, these events modify the operational state
+or mission constraints faced by an active plan. They are enabled only in the
+hard and expert levels and are placed at predefined points in each episode so
+that replanning behavior can be evaluated under repeatable conditions. Hard
+episodes contain a small number of temporally separated perturbations, whereas
+expert episodes contain frequent perturbations that may occur concurrently or
+in succession and impose stronger communication and global scheduling
+pressure. Figure~\ref{fig:runtime-perturbation-distribution} summarizes the
+composition and frequency of the triggered perturbations at both levels.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{figures/runtime_perturbation_distribution.png}
+    \caption{Composition and frequency of runtime perturbations in the hard and
+    expert evaluation episodes. Percentages show the share of triggered events
+    in each category, and the values on the right show the mean number of
+    perturbations per episode.}
+    \label{fig:runtime-perturbation-distribution}
+\end{figure}
+
 \subsection{Evaluation Metrics}
 The third design property is an explicit, multi-dimensional assessment of
-end-to-end behavior on the task defined in Section~3. Rather than reducing the
-closed-loop rescue process to a single aggregated score, the evaluation reports
-the six mission-level metrics in Table~\ref{tab:evaluation-metrics}. Together,
-these metrics assess whether the system completes rescue objectives promptly,
-uses fleet resources responsibly, and maintains coordinated operation when
-conditions change.
+end-to-end behavior on the task defined in Section~3. The evaluation reports
+the six mission-level metrics in Table~\ref{tab:evaluation-metrics} to retain an
+interpretable view of system behavior, and combines them into an episode-level
+score for comparison across methods and scenario conditions. Together, these
+metrics assess whether the system completes rescue objectives promptly, uses
+fleet resources responsibly, and maintains coordinated operation when
+conditions change. Event stability specifically measures behavior under
+runtime perturbations and is therefore reported only for the hard and expert
+difficulty levels, where such perturbations are introduced. It is not
+applicable to the simple and normal levels.
 
 \input{tables/evaluation-metrics}
+
+All six metrics are converted to normalized scores $s_k\in[0,100]$, with a
+higher value consistently indicating better mission performance. Their
+aggregation also accounts for the fact that episodes impose different levels
+of inherent and operational complexity. Let $n_f$, $n_e$, $n_r$, and $T$
+denote the number of fire points, the number of runtime perturbations, the
+number of required resupply operations, and the mission duration, respectively.
+For a complexity factor $x$, we use the bounded normalization
+\begin{equation}
+\psi(x;l,u)=
+\begin{cases}
+0, & x\leq l,\\
+\dfrac{x-l}{u-l}, & l<x<u,\\
+1, & x\geq u,
+\end{cases}
+\label{eq:complexity-normalization}
+\end{equation}
+where $l$ and $u$ are its low-pressure and saturation reference points. The
+episode complexity coefficient is then defined as
+\begin{equation}
+\begin{aligned}
+\rho={}&
+\alpha_f\psi(n_f;l_f,u_f)
++\alpha_e\psi(n_e;l_e,u_e)\\
+&+\alpha_r\psi(n_r;l_r,u_r)
++\alpha_t\psi(T;l_t,u_t),
+\end{aligned}
+\label{eq:episode-complexity}
+\end{equation}
+where the non-negative coefficients $\alpha_j$ sum to one and specify the
+relative contribution of task scale, runtime dynamics, resource pressure, and
+sustained mission demand. Because each component is bounded, $\rho\in[0,1]$
+provides a common description of episode complexity across the four difficulty
+levels.
+
+The final score is computed directly by combining the six normalized mission
+metrics with this complexity coefficient:
+\begin{equation}
+S=
+\left(\sum_{k=1}^{6}w_k s_k\right)
+\left(1-\lambda\rho\right),
+\qquad
+w_k\geq0,
+\quad
+\sum_{k=1}^{6}w_k=1,
+\label{eq:final-evaluation-score}
+\end{equation}
+where $w_k$ denotes the fixed weight of each mission metric and $\lambda$
+controls the maximum influence of episode complexity. The same weights,
+normalization references, and complexity adjustment are used for all evaluated
+methods. The component metrics remain available for diagnostic analysis, while
+$S$ provides a unified measure for overall comparison.
 
 \endinput

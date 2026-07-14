@@ -7,9 +7,9 @@
     \renewcommand{\arraystretch}{1.2}
     \begin{tabularx}{\textwidth}{
         @{}
-        >{\raggedright\arraybackslash}p{1.5cm}
-        >{\raggedright\arraybackslash}X
-        >{\raggedright\arraybackslash}X
+        >{\raggedright\arraybackslash}p{3cm}
+        >{\raggedright\arraybackslash}p{3.5cm}
+        >{\raggedright\arraybackslash}p{4cm}
         >{\raggedright\arraybackslash}X
         @{}
     }
@@ -17,7 +17,7 @@
         \textbf{difficulty levels} &
         \textbf{Fire-point configuration} &
         \textbf{Fleet/resource conditions} &
-        \textbf{Dynamic conditions} \\
+        \textbf{runtime perturbations} \\
         \midrule
         Simple &
         Sparse static fire points; few task zones. &
@@ -32,12 +32,12 @@
         Hard &
         Multi-region fire scene. &
         Energy or payload constrained. &
-        Single perturbation. \\
+        Few, temporally separated perturbations. \\
 
         Expert &
         Dense or spreading fire-point layout. &
         Competing resource demands. &
-        Concurrent perturbations; communication degradation. \\
+        Frequent  perturbations; global scheduling pressure. \\
         \bottomrule
     \end{tabularx}
 \end{table}

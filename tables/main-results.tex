@@ -1,0 +1,74 @@
+\begin{table}[!htbp]
+    \centering
+    \caption{Main results across foundation models and scenario difficulty levels.
+    $S$ is the overall score, and the remaining columns report normalized mission-level scores in
+    $[0,100]$ (higher is better). Event stability is not applicable to the
+    simple and normal settings and is denoted by ``--''. The best value for
+    each metric at every difficulty level is shown in bold when it is unique.}
+    \label{tab:main-results}
+    \scriptsize
+    \setlength{\tabcolsep}{3.2pt}
+    \renewcommand{\arraystretch}{1.12}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}llcrrrrrr@{}}
+        \toprule
+        \multirow{2}{*}{\textbf{Difficulty}}
+        & \multirow{2}{*}{\textbf{Foundation model}}
+        & \multirow{2}{*}{\textbf{$S$}}
+        & \multicolumn{6}{c}{\textbf{Mission-level score}} \\
+        \cmidrule(l){4-9}
+        & &
+        & \textbf{Completion}
+        & \textbf{Response}
+        & \textbf{Time}
+        & \makecell{\textbf{Event}\\\textbf{stability}}
+        & \makecell{\textbf{Resource}\\\textbf{pressure}}
+        & \textbf{Coordination} \\
+        \midrule
+
+        Simple & ChatGPT~5.5
+        & \textbf{94.45} & 100.00 & \textbf{92.32} & \textbf{92.19}
+        & -- & \textbf{85.28} & \textbf{85.15} \\
+        & Gemini~3.1~Pro
+        & 93.23 & 100.00 & 88.78 & 91.06 & -- & 84.45 & 80.71 \\
+        & Claude~Sonnet~4.7
+        & 92.97 & 100.00 & 91.44 & 86.62 & -- & 82.18 & 83.96 \\
+        & DeepSeek~V4~Pro
+        & 88.57 & 100.00 & 88.23 & 71.93 & -- & 77.26 & 78.98 \\
+        \addlinespace
+
+        Normal & ChatGPT~5.5
+        & \textbf{90.36} & 100.00 & \textbf{96.62} & \textbf{73.13}
+        & -- & \textbf{88.12} & \textbf{79.27} \\
+        & Gemini~3.1~Pro
+        & 88.23 & 100.00 & 94.10 & 71.50 & -- & 86.68 & 71.72 \\
+        & Claude~Sonnet~4.7
+        & 89.18 & 100.00 & 96.09 & 68.24 & -- & 84.54 & 78.12 \\
+        & DeepSeek~V4~Pro
+        & 86.94 & 100.00 & 93.30 & 68.19 & -- & 83.25 & 74.97 \\
+        \addlinespace
+
+        Hard & ChatGPT~5.5
+        & \textbf{66.09} & 100.00 & \textbf{94.97} & \textbf{41.22}
+        & \textbf{42.25} & \textbf{63.19} & \textbf{67.24} \\
+        & Gemini~3.1~Pro
+        & 62.81 & 100.00 & 92.58 & 39.60 & 33.75 & 59.10 & 60.65 \\
+        & Claude~Sonnet~4.7
+        & 64.74 & 99.86 & 94.22 & 35.28 & 40.50 & 62.15 & 65.88 \\
+        & DeepSeek~V4~Pro
+        & 59.03 & 98.57 & 83.90 & 30.76 & 34.75 & 61.36 & 59.07 \\
+        \addlinespace
+
+        Expert & ChatGPT~5.5
+        & \textbf{41.15} & \textbf{93.24} & \textbf{67.01} & \textbf{13.23}
+        & \textbf{2.67} & \textbf{60.15} & \textbf{61.25} \\
+        & Gemini~3.1~Pro
+        & 38.28 & 90.09 & 61.30 & 12.02 & 0.00 & 58.72 & 55.82 \\
+        & Claude~Sonnet~4.7
+        & 39.81 & 92.43 & 65.55 & 9.13 & 0.00 & 58.99 & 60.11 \\
+        & DeepSeek~V4~Pro
+        & 37.55 & 90.95 & 61.09 & 3.54 & 0.00 & 53.43 & 54.43 \\
+        \bottomrule
+    \end{tabular}%
+    }
+\end{table}
