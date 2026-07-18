@@ -43,7 +43,7 @@ needed to design and evaluate a closed-loop system.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1\textwidth]{figures/system}
+    \includegraphics[width=1\textwidth]{figures/system-overview.png}
     \caption{Overview of the proposed system.}
     \label{fig:method-overview}
 \end{figure}
@@ -88,15 +88,15 @@ It receives the structured fire situation from Vision Analysis,
 retrieves relevant past cases and lessons from both memory modules,
 and produces a coordinated plan in which each UAV's task chain respects
 the fleet's capabilities and the mission's operational constraints.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/prompt}
-    \caption{The prompt template used by the Mission Planning module.}
-    \label{fig:planning-prompt}
-\end{figure}
-
-The prompt template for the planning LLM is shown in Figure~\ref{fig:planning-prompt}.
+Formally, the planning process is expressed as
+\begin{equation}
+P=\mathcal{G}\bigl(R,U,C,M_E(q),M_L(q)\bigr),
+\qquad q=q(R,U,C),
+\label{eq:memory-augmented-planning}
+\end{equation}
+where $\mathcal{G}$ denotes the planning LLM, $q$ is a query constructed from
+the current task zones, fleet states, and constraints, and $M_E(q)$ and $M_L(q)$
+denote the episodic cases and lessons retrieved for that query, respectively.
 
 \paragraph{Validation.} The Validation module assesses each candidate plan through
 two sequential checks. Together, the two checks form the audit--correction loop:
@@ -136,6 +136,29 @@ Each case records the situation, the generated or revised plan,
 and the corresponding outcome.
 Cases are indexed by situational features, so that when a new scenario arises,
 the system retrieves the most similar past cases as tactical references.
+Specifically, the episodic memory is represented as
+\begin{equation}
+M_E=\{(z_i,P_i,o_i)\}_{i=1}^{N_E},
+\label{eq:episodic-memory}
+\end{equation}
+where $z_i$, $P_i$, and $o_i$ denote the task situation, the associated plan,
+and the execution outcome of case $i$, respectively. For either episodic
+memory or lesson memory, the system retrieves the $K$ most semantically similar
+entries to the current query according to
+\begin{equation}
+\mathcal{R}_K(q,M)=
+\underset{m_i\in M}{\operatorname{TopK}}\;
+\operatorname{sim}(q,m_i),
+\qquad
+\operatorname{sim}(q,m_i)=
+\frac{\phi(q)^\top\phi(m_i)}
+{\lVert\phi(q)\rVert_2\lVert\phi(m_i)\rVert_2},
+\label{eq:semantic-memory-retrieval}
+\end{equation}
+where $M\in\{M_E,M_L\}$ is the queried memory, $\phi(\cdot)$ maps a query
+or memory entry to its semantic embedding, and $\operatorname{sim}(\cdot,\cdot)$
+is the cosine similarity. The retrieved set is supplied to the corresponding
+planning or replanning prompt as reference information.
 
 Lesson Memory serves a different role. Instead of storing concrete cases,
 it keeps higher-level lessons distilled from every run.

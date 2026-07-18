@@ -1,0 +1,75 @@
+% Required packages in the main document:
+% \usepackage{booktabs}
+% \usepackage{tabularx}
+% \usepackage{array}
+
+\begin{table}[!htbp]
+    \centering
+    \caption{Technical specifications of the real UAV platform.}
+    \label{tab:real_uav_hardware}
+    \small
+    \setlength{\tabcolsep}{5pt}
+    \renewcommand{\arraystretch}{1.15}
+
+    \begin{tabularx}{\textwidth}{
+        @{}
+        >{\raggedright\arraybackslash}p{2.3cm}
+        >{\raggedright\arraybackslash}p{3.2cm}
+        >{\raggedright\arraybackslash}X
+        @{}
+    }
+        \toprule
+        \textbf{Subsystem} &
+        \textbf{Model} &
+        \textbf{Key specifications} \\
+        \midrule
+
+        UAV frame &
+        Holybro X500 V2 &
+        Carbon-fiber quadrotor frame, 500-mm wheelbase,
+        approximately 610-g frame weight, and 1.5-kg published
+        payload capacity excluding the battery at 70\% throttle. \\
+
+        Flight controller &
+        Holybro Pixhawk 6X &
+        STM32H753 processor at 480 MHz, triple-redundant IMUs,
+        dual barometers, 16 PWM outputs, two CAN buses,
+        and 100-Mbps Ethernet. \\
+
+        Companion computer &
+        NVIDIA Jetson Orin NX 8 GB &
+        6-core Arm Cortex-A78AE CPU, NVIDIA Ampere GPU,
+        8-GB LPDDR5 memory, up to 117 TOPS,
+        and configurable 10--40-W power modes. \\
+
+        LiDAR &
+        Livox Mid-360 &
+        $360^{\circ}$ horizontal and $-7^{\circ}$--$52^{\circ}$
+        vertical field of view, 200,000 points/s, 10-Hz frame rate,
+        40-m range at 10\% reflectivity, 0.1-m blind zone,
+        265-g weight, and 6.5-W average power. \\
+
+        RGB-D camera &
+        Intel RealSense D455 &
+        Global-shutter stereo depth camera,
+        $87^{\circ}\times58^{\circ}$ depth field of view,
+        depth resolution up to $1280\times720$ at 90 fps,
+        approximately 0.6--6-m effective range,
+        integrated IMU, USB 3.1 interface, and 116-g weight. \\
+
+        Propulsion system &
+        $4\times$ Holybro 2216 KV920 &
+        Four 920-KV brushless motors, four 20-A ESCs,
+        and $10\times4.5$-in propellers, with a maximum
+        manufacturer bench thrust of approximately
+        1.33 kgf per motor at 16 V. \\
+
+        Battery &
+        Dualsky XP3300-6HED &
+        6S lithium-polymer battery, 3300-mAh capacity,
+        22.2-V nominal voltage, 25.2-V fully charged voltage,
+        and approximately 73.3-Wh nominal energy. \\
+
+        \bottomrule
+    \end{tabularx}
+\end{table}

@@ -1,0 +1,27 @@
+\begin{table}[!htbp]
+    \centering
+    \caption{Ablation results with DeepSeek~V4~Pro as the foundation model.
+    Values report the mean overall score $S$ over 20 episodes at each
+    difficulty level. The best result in each column is shown in bold.}
+    \label{tab:ablation-results}
+    \small
+    \setlength{\tabcolsep}{7pt}
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabular}{@{}lcccc@{}}
+        \toprule
+        \multirow{2}{*}{\textbf{Configuration}}
+        & \multicolumn{4}{c}{\textbf{Overall score $S$}} \\
+        \cmidrule(l){2-5}
+        & \textbf{Simple} & \textbf{Normal} & \textbf{Hard} & \textbf{Expert} \\
+        \midrule
+        Full
+        & \textbf{90.54} & 87.63 & \textbf{59.03} & \textbf{37.55} \\
+        w/o Validation
+        & 88.38 & 85.30 & 55.22 & 35.50 \\
+        w/o Memory
+        & 88.57 & 86.94 & 49.35 & 22.10 \\
+        w/o Runtime Replanning
+        & 90.33 & \textbf{88.14} & 35.86 & 12.98 \\
+        \bottomrule
+    \end{tabular}
+\end{table}

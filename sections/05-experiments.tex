@@ -4,16 +4,17 @@
 \subsection{Experimental Setup}
 
 We evaluate the proposed system using the evaluation suite described in
-Section~4. The experiments comprise two complementary settings. The first
+Section~4. The experiments comprise three complementary settings. The first
 assesses the end-to-end system with different general-purpose foundation
 models under controlled mission conditions of varying difficulty. The second
-examines whether a compact model specialized with domain decision traces can
-replace the general-purpose model in Mission Planning.
+examines the contribution of the main system components through ablation. The
+third investigates whether a compact model specialized with domain decision
+traces can replace the general-purpose model in Mission Planning.
 
 To isolate the influence of the foundation model on plan generation,
 validation, and runtime adaptation, we fix Gemini~3.1~Pro as the foundation
 model for Vision Analysis in the first setting. We then evaluate four
-configurations by using ChatGPT~5.5, Gemini~3.1~Pro, Claude~Sonnet~4.7, and
+configurations by using ChatGPT~5.5, Gemini~3.1~Pro, Claude~Opus~4.7, and
 DeepSeek~V4~Pro, respectively, in the remaining LLM-based modules. This design
 keeps the transformation from aerial imagery to the structured fire situation
 consistent across configurations, allowing their subsequent differences to
@@ -21,7 +22,19 @@ reflect the models used in Mission Planning, Semantic Validation, and Runtime
 Replanning. Each configuration is evaluated on the same 80 episodes, comprising
 20 episodes at each of the simple, normal, hard, and expert difficulty levels.
 
-For the second setting, we construct 2,000 mission-planning demonstrations
+For the second setting, we use the DeepSeek~V4~Pro configuration and compare the
+full system with three ablated variants: w/o Validation, w/o Memory, and w/o
+Runtime Replanning. The first removes the semantic and deterministic
+audit--correction loop; the second disables retrieval from both Episodic Memory
+and Lesson Memory; and the third retains the initial plan after runtime
+perturbations without invoking the repair module. All other models, prompts,
+and execution settings remain unchanged. All four configurations are evaluated
+on the same 80 episodes, with 20 episodes at each difficulty level. In the
+simple and normal settings, where no runtime perturbations occur, the w/o
+Runtime Replanning variant differs only in that the repair module is disabled
+and therefore remains inactive throughout execution.
+
+For the third setting, we construct 2,000 mission-planning demonstrations
 using the proposed system with Gemini~3.1~Pro as the teacher model. The
 demonstrations are generated from scenarios disjoint from the 80 evaluation
 episodes. Each demonstration has the form
@@ -54,47 +67,49 @@ same episode subset.
 Table~\ref{tab:main-results} summarizes the end-to-end results for all four
 foundation-model configurations and difficulty levels, while
 Figure~\ref{fig:model-total-score} provides a direct comparison of their
-overall scores. ChatGPT~5.5 achieves the highest overall score at every level,
-with scores of 94.45, 90.36, 66.09, and 41.15 from simple to expert,
-respectively. Its advantage is small in the simple setting but becomes more
-evident as the scenarios impose stronger temporal, event, and resource
-constraints. Averaged over the four difficulty levels, ChatGPT~5.5 obtains an
-overall score of 73.01, followed by Claude~Sonnet~4.7 (71.67),
-Gemini~3.1~Pro (70.64), and DeepSeek~V4~Pro (68.02). The consistent ordering
-in Figure~\ref{fig:model-total-score} indicates that the observed advantage is
-not tied to a single difficulty regime.
+overall scores. The leading configuration depends on scenario difficulty:
+Gemini~3.1~Pro and Claude~Opus~4.7 obtain the strongest scores in the simple
+and normal settings, whereas ChatGPT~5.5 leads in the hard and expert settings
+with scores of 65.09 and 40.15, respectively. Averaged over the four
+difficulty levels, Claude~Opus~4.7 obtains the highest overall score of 71.67,
+followed by Gemini~3.1~Pro (70.64), ChatGPT~5.5 (70.53), and DeepSeek~V4~Pro
+(68.68). The changing ordering indicates that model performance depends on the
+type and intensity of scenario pressure rather than following one fixed
+ranking across all difficulty levels.
 
 \begin{figure}[!htbp]
     \centering
-    \includegraphics[width=\textwidth]{figures/model-total-score.png}
+    \includegraphics[width=\textwidth]{figures/foundation-model-overall-scores.png}
     \caption{Overall scores of the four foundation-model configurations across
     scenario difficulty levels.}
     \label{fig:model-total-score}
 \end{figure}
 
-\input{tables/main-results}
+\input{tables/foundation-model-results}
 
 All configurations complete nearly all objectives in the simple, normal, and
 hard settings, indicating that the proposed pipeline reliably converts the
 shared visual analysis into executable missions. The performance gap instead
-arises primarily from execution quality. In particular, ChatGPT~5.5 maintains
-the strongest response, resource-pressure, and coordination scores as
-difficulty increases. This suggests that its plans and runtime adaptations
-make more effective use of the available fleet rather than merely maximizing
-task completion.
+arises primarily from execution quality. The advantage shifts toward
+ChatGPT~5.5 in the hard and expert settings, where response, resource-pressure,
+coordination, and event-stability scores become more important. In the simple
+and normal settings, Gemini~3.1~Pro and Claude~Opus~4.7 remain stronger on
+several execution metrics. This pattern suggests that model differences emerge
+primarily in how the configurations handle increasing temporal, resource, and
+runtime pressure rather than in basic task completion.
 
 Figure~\ref{fig:model-performance-radar} further compares the six
 mission-level metrics. In the simple and normal settings, the model profiles
 largely overlap near the outer region of the plots, although differences in
 time efficiency and coordination are already visible. The profiles separate
 more clearly in the hard and expert settings, where ChatGPT~5.5 retains the
-largest and most balanced coverage. Claude~Sonnet~4.7 is generally the closest
-alternative, whereas Gemini~3.1~Pro and DeepSeek~V4~Pro show larger losses on
-coordination and time efficiency as scenario pressure increases.
+largest and most balanced coverage. Claude~Opus~4.7 is the strongest alternative
+in the simple and normal settings, whereas DeepSeek~V4~Pro shows the largest
+losses in coordination and time efficiency as scenario pressure increases.
 
 \begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/model-performance-radar.png}
+    \includegraphics[width=0.9\textwidth]{figures/foundation-model-performance-radar.png}
     \caption{Mission-level performance profiles of the four foundation-model
     configurations at each difficulty level. Larger radial values indicate
     better performance.}
@@ -111,6 +126,50 @@ so efficiently while preserving mission continuity under repeated runtime
 perturbations. These results also expose clear headroom for more robust
 replanning and time-aware resource allocation.
 
+\FloatBarrier
+
+\subsection{Ablation Studies}
+
+Table~\ref{tab:ablation-results} reports the ablation results with
+DeepSeek~V4~Pro fixed as the foundation model. Removing Validation causes a
+modest but consistent reduction across all four difficulty levels, with drops
+of 2.15, 2.33, 3.80, and 2.06 points from simple to expert. The limited change
+in average mission score does not imply that the module remains inactive: the
+validation loop is triggered 5, 5, 4, and 6 times in the simple, normal, hard,
+and expert settings, respectively. These interventions suggest that Validation
+primarily serves as an occasional reliability safeguard against invalid or
+tactically implausible plans rather than as a continuous source of score
+improvement.
+
+\input{tables/deepseek-ablation-results}
+
+Figure~\ref{fig:ablation-score-delta} visualizes the score change of each
+ablated system relative to the full configuration.
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/ablation-score-change-heatmap.png}
+    \caption{Change in overall score relative to the full system for each
+    ablated variant and difficulty level. Negative values indicate performance
+    degradation, while positive values indicate improvement.}
+    \label{fig:ablation-score-delta}
+\end{figure}
+
+The contribution of Memory becomes more pronounced as task demands increase.
+Removing both memory modules reduces the score by only 1.97 points in the
+simple setting and 0.69 points in the normal setting, but the reduction grows
+to 9.68 points in hard scenarios and 15.45 points in expert scenarios. This
+pattern indicates that retrieved cases and distilled lessons are most useful
+when resource constraints, event interactions, and scheduling pressure make
+planning less routine.
+
+Disabling Runtime Replanning has little effect in the simple and normal
+settings, where no perturbations are triggered. In contrast, its score falls
+from 59.03 to 35.86 in hard scenarios and from 37.55 to 12.98 in expert
+scenarios. The sharp degradation confirms that an initially valid plan is
+insufficient once the execution state changes, and that runtime repair is the
+key mechanism for maintaining mission performance under perturbations.
+
 \subsection{Fine-Tuned Planner Evaluation}
 
 Table~\ref{tab:fine-tuned-planner-results} compares the Gemini~3.1~Pro
@@ -121,7 +180,7 @@ score increases from 63.77 to 90.87 in the simple setting and from 67.19 to
 an absolute gain of 23.65 points and raises Qwen3-8B to 98.24\% of the Gemini
 planner's average score.
 
-\input{tables/fine-tuned-planner-results}
+\input{tables/planner-fine-tuning-results}
 
 Figure~\ref{fig:planner-performance-radar} shows that the improvement extends
 across the mission-level performance profile. The original Qwen3-8B exhibits
@@ -133,15 +192,17 @@ mission time and coordination. This indicates that the validated demonstrations
 transfer not only output-format compliance but also task-allocation and
 resource-management behavior to the smaller model.
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
     \centering
-    \includegraphics[width=\textwidth]{figures/2-performance-radar.png}
-    \caption{Mission-level performance profiles of the original Qwen3-8B,
-    fine-tuned Qwen3-8B, and Gemini~3.1~Pro planners in the simple and normal
-    settings. Larger radial values indicate better performance. Event stability
-    is not interpreted because these settings contain no runtime perturbations.}
+    \includegraphics[width=0.96\textwidth]{figures/planner-performance-radar.png}
+    \caption{Mission-level profiles of the three planners in the simple and
+    normal settings. Larger radial values indicate better performance. Event
+    stability is not interpreted because neither setting contains runtime
+    perturbations.}
     \label{fig:planner-performance-radar}
 \end{figure}
+
+\FloatBarrier
 
 The fine-tuned planner also reduces planning overhead under the evaluated
 deployment setting. Its mean planning time across the two levels is 14.01~s,
@@ -156,13 +217,12 @@ show that domain specialization enables Qwen3-8B to retain most of the teacher
 planner's mission performance while providing a more efficient locally
 deployable alternative for initial mission planning.
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
     \centering
-    \includegraphics[width=\textwidth]{figures/2-score-efficiency-summary.png}
-    \caption{Overall score and planning overhead of the three planners in the
-    simple and normal settings: (a) total score, (b) planning duration, and
-    (c) planning-token usage. Lower values are better for planning duration and
-    token usage.}
+    \includegraphics[width=\textwidth]{figures/planner-score-efficiency-comparison.png}
+    \caption{Score--efficiency comparison of the three planners: (a) total
+    score, (b) planning duration, and (c) planning-token usage. Lower values are
+    better in (b) and (c).}
     \label{fig:planner-score-efficiency}
 \end{figure}
 

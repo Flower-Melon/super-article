@@ -1,6 +1,55 @@
 % !TEX root = ../main.tex
 \section{Conclusion}
 
-Summarize the paper and discuss limitations and future work.
+This paper studies multi-UAV forest-fire rescue as a closed-loop decision
+problem that connects aerial situation understanding, resource-constrained
+mission planning, and runtime adaptation. To represent this process, we
+formulate the rescue workflow as the mappings from observations to fire points
+and task zones, from task zones and fleet states to an initial plan, and from
+runtime perturbations to a revised plan. Based on this formulation, we develop
+a modular system that integrates Vision Analysis, Mission Planning, Validation, Runtime Replanning, and two forms of
+experience memory. The resulting architecture produces executable fleet plans,
+audits them before execution, and revises affected tasks when the operational
+state changes.
+
+We further introduce a real-UAV-informed evaluation suite in AirSim. The suite
+uses platform and sensing constraints derived from a physical UAV and organizes
+80 fixed episodes into four difficulty levels. Its mission-level metrics retain
+separate views of task completion, response, mission time, event stability,
+resource pressure, and coordination. Experiments with four foundation-model
+configurations show that no single ranking holds across all conditions.
+Gemini~3.1~Pro and Claude~Opus~4.7 perform strongly in the lower-difficulty
+settings, whereas ChatGPT~5.5 achieves the highest scores in the hard and
+expert settings. Across all models, increasing difficulty primarily degrades
+time efficiency, coordination, and event stability rather than basic task
+completion, identifying runtime continuity and time-aware resource allocation
+as the main remaining bottlenecks.
+
+The ablation results clarify the roles of the system components. Validation
+produces a modest but consistent score improvement and is triggered across all
+four difficulty levels, supporting its role as an occasional reliability
+safeguard. Memory has limited influence in routine scenarios but becomes
+increasingly important under resource and scheduling pressure, while removing
+Runtime Replanning causes the largest degradation in hard and expert episodes.
+The planner-specialization experiment additionally shows that validated
+planning demonstrations can transfer domain behavior to a smaller model. On
+the simple and normal episodes, the fine-tuned Qwen3-8B reaches 98.24\% of the
+Gemini~3.1~Pro planner's average score, while reducing mean planning time from
+37.50~s to 14.01~s and mean planning-token usage from 13,353 to 3,593. These
+results demonstrate a practical path toward lower-cost local deployment of the
+initial planning module.
+
+Several limitations remain. The evaluation is conducted in a calibrated
+simulation environment and therefore does not establish effectiveness in real
+fire, smoke, weather, and communication conditions. The fixed episode set and
+single platform calibration also cover only a limited range of possible fleet
+scales and rescue environments. Moreover, the fine-tuned planner is evaluated
+only in the simple and normal settings and does not yet replace the runtime
+adaptation capability required by the complete closed loop. Future work will
+extend the suite to real-flight and mixed real--sim trials, more diverse UAV
+platforms and fire dynamics, and larger multi-UAV fleets. It will also examine
+specialized models for hard and expert scenarios, more selective memory
+retrieval, and replanning methods that improve mission continuity without
+incurring excessive time and resource overhead.
 
 \endinput
