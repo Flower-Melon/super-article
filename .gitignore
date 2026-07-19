@@ -18,12 +18,9 @@
 *.bcf
 *.xdv
 
-# PDF output (取消注释下一行如果想忽略 PDF)
-# *.pdf
+# Reference data
+reference/
 
 # OS files
 Thumbs.db
 .DS_Store
-
-# Claude.md
-Claude.md

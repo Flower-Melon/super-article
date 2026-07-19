@@ -25,3 +25,6 @@ make          # 快速编译（仅 xelatex 一次）
 make pdf      # 完整编译（含参考文献）
 make clean    # 清理辅助文件
 ```
+2.1 UAV-based Wildfire Response from Perception to Decision Making
+
+2.2 Large Language Models for Autonomous Robotic Systems

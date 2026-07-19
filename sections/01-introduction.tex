@@ -1,6 +1,52 @@
 % !TEX root = ../main.tex
 \section{Introduction}
 
-Write your introduction here.
+Wildfires threaten ecosystems, infrastructure, and human safety
+\citep{bowman2020wildfire}. UAVs can rapidly observe hazardous and inaccessible
+areas through flexible aerial sensing \citep{allan2022remote}, but operational
+response requires more than aerial detection. Observations must be converted
+into task zones, assigned across a resource-limited fleet, and revised as the
+fire or UAV state changes. Multi-UAV wildfire rescue is therefore a closed-loop
+decision problem rather than an isolated perception or path-planning task.
+
+Existing work has advanced fire detection, aerial scene understanding, and
+damage assessment, but transforming observations into coordinated response
+actions remains challenging \citep{erdelj2017help}. A practical plan must
+respect energy, payload, communication, safety, and priority constraints
+\citep{floreano2015science}, while accommodating fire evolution, UAV faults,
+and resource shortages. Large language models (LLMs) and multimodal LLMs offer
+a flexible interface for connecting visual interpretation, task decomposition,
+and high-level planning \citep{driess2023palme}. However, free-form generation
+is insufficient for safety-critical missions: plans can violate fleet constraints
+or become invalid when execution conditions change.
+
+We formulate multi-UAV wildfire rescue as a decision chain from aerial
+observation to fire-situation understanding, resource-constrained planning, and
+runtime adaptation. Our modular system combines Vision Analysis, Mission
+Planning, Semantic and Deterministic Validation, Episodic and Lesson Memory,
+and Runtime Replanning. It converts aerial imagery into fire points and task
+zones, generates an executable plan, and uses retrieved cases and lessons to
+support initial planning and fault-driven repair.
+
+To evaluate this capability, we construct a real-UAV-informed AirSim suite that
+assesses understanding, constrained planning, and adaptation under runtime
+perturbations. It calibrates observation, energy, payload, and communication
+conditions from a real platform, organizes 80 fixed evaluation episodes into
+four difficulty levels, and measures completion, response, mission time, event stability,
+resource pressure, and coordination.
+
+The main contributions of this work are summarized as follows:
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt,topsep=3pt]
+    \item We develop a modular LLM-based rescue system that integrates
+    Vision Analysis, constrained multi-UAV Mission Planning, independent
+    Validation, Episodic and Lesson Memory, and Runtime Replanning.
+    \item We construct a real-UAV-informed AirSim evaluation suite with four
+    difficulty levels and six mission-level metrics for end-to-end assessment
+    under controlled operational pressure.
+    \item We evaluate multiple foundation-model configurations, analyze the
+    contributions of Validation, Memory, and Runtime Replanning, and assess
+    whether a compact planner specialized with validated demonstrations can
+    retain strong mission performance with lower planning overhead.
+\end{enumerate}
 
 \endinput

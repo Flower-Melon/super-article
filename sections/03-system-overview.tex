@@ -2,7 +2,7 @@
 
 \subsection{Task Modeling}
 
-Forest-fire rescue is a closed-loop decision task rather than an isolated
+Wildfire rescue is a closed-loop decision task rather than an isolated
 perception or allocation problem. In an operational mission, aerial observations
 first reveal dispersed fire points; these points must then be organized into
 actionable task zones. The fleet must allocate its limited energy,
@@ -123,7 +123,7 @@ Its output is not a new global plan, but a local revision of the current plan.
 Unlike the main pipeline, Runtime Replanning reasons about a dynamic execution state and
 changes only the affected part of the plan.
 
-When a runtime perturbation occurs, the module retrieves similar fault scenarios
+When a runtime perturbation occurs, the module retrieves similar fault cases
 from Episodic Memory as repair references.
 These cases describe how comparable failures were resolved in past missions,
 providing the replanning LLM with tactical precedents for the current situation.
@@ -134,7 +134,7 @@ The two memory modules differ in what they store and how their contents are used
 Episodic Memory stores concrete successful cases as input--output pairs.
 Each case records the situation, the generated or revised plan,
 and the corresponding outcome.
-Cases are indexed by situational features, so that when a new scenario arises,
+Cases are indexed by situational features, so that when a new mission situation arises,
 the system retrieves the most similar past cases as tactical references.
 Specifically, the episodic memory is represented as
 \begin{equation}

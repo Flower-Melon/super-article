@@ -36,7 +36,7 @@ and therefore remains inactive throughout execution.
 
 For the third setting, we construct 2,000 mission-planning demonstrations
 using the proposed system with Gemini~3.1~Pro as the teacher model. The
-demonstrations are generated from scenarios disjoint from the 80 evaluation
+demonstrations are generated from mission situations disjoint from the 80 evaluation
 episodes. Each demonstration has the form
 \[
 (R,U,C) \rightarrow P,
@@ -67,21 +67,21 @@ same episode subset.
 Table~\ref{tab:main-results} summarizes the end-to-end results for all four
 foundation-model configurations and difficulty levels, while
 Figure~\ref{fig:model-total-score} provides a direct comparison of their
-overall scores. The leading configuration depends on scenario difficulty:
+overall scores. The leading configuration depends on episode difficulty:
 Gemini~3.1~Pro and Claude~Opus~4.7 obtain the strongest scores in the simple
 and normal settings, whereas ChatGPT~5.5 leads in the hard and expert settings
 with scores of 65.09 and 40.15, respectively. Averaged over the four
 difficulty levels, Claude~Opus~4.7 obtains the highest overall score of 71.67,
 followed by Gemini~3.1~Pro (70.64), ChatGPT~5.5 (70.53), and DeepSeek~V4~Pro
 (68.68). The changing ordering indicates that model performance depends on the
-type and intensity of scenario pressure rather than following one fixed
+type and intensity of episode pressure rather than following one fixed
 ranking across all difficulty levels.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/foundation-model-overall-scores.png}
     \caption{Overall scores of the four foundation-model configurations across
-    scenario difficulty levels.}
+    episode difficulty levels.}
     \label{fig:model-total-score}
 \end{figure}
 
@@ -105,7 +105,7 @@ time efficiency and coordination are already visible. The profiles separate
 more clearly in the hard and expert settings, where ChatGPT~5.5 retains the
 largest and most balanced coverage. Claude~Opus~4.7 is the strongest alternative
 in the simple and normal settings, whereas DeepSeek~V4~Pro shows the largest
-losses in coordination and time efficiency as scenario pressure increases.
+losses in coordination and time efficiency as episode pressure increases.
 
 \begin{figure}[!htbp]
     \centering
@@ -116,11 +116,11 @@ losses in coordination and time efficiency as scenario pressure increases.
     \label{fig:model-performance-radar}
 \end{figure}
 
-Increasing scenario difficulty nevertheless degrades every configuration.
+Increasing episode difficulty nevertheless degrades every configuration.
 The most pronounced changes occur in mission time and event stability: time
-scores fall to 3.54--13.23 in expert scenarios, while event-stability scores
+scores fall to 3.54--13.23 in expert episodes, while event-stability scores
 fall to 0--2.67. By contrast, expert-level completion remains above 90 for all
-models. Thus, the principal challenge in the hardest scenarios is not whether
+models. Thus, the principal challenge in the hardest episodes is not whether
 the system can eventually address the rescue objectives, but whether it can do
 so efficiently while preserving mission continuity under repeated runtime
 perturbations. These results also expose clear headroom for more robust
@@ -158,15 +158,15 @@ ablated system relative to the full configuration.
 The contribution of Memory becomes more pronounced as task demands increase.
 Removing both memory modules reduces the score by only 1.97 points in the
 simple setting and 0.69 points in the normal setting, but the reduction grows
-to 9.68 points in hard scenarios and 15.45 points in expert scenarios. This
+to 9.68 points in hard episodes and 15.45 points in expert episodes. This
 pattern indicates that retrieved cases and distilled lessons are most useful
 when resource constraints, event interactions, and scheduling pressure make
 planning less routine.
 
 Disabling Runtime Replanning has little effect in the simple and normal
 settings, where no perturbations are triggered. In contrast, its score falls
-from 59.03 to 35.86 in hard scenarios and from 37.55 to 12.98 in expert
-scenarios. The sharp degradation confirms that an initially valid plan is
+from 59.03 to 35.86 in hard episodes and from 37.55 to 12.98 in expert
+episodes. The sharp degradation confirms that an initially valid plan is
 insufficient once the execution state changes, and that runtime repair is the
 key mechanism for maintaining mission performance under perturbations.
 
@@ -209,7 +209,7 @@ deployment setting. Its mean planning time across the two levels is 14.01~s,
 compared with 37.50~s for Gemini~3.1~Pro, while its mean planning-token usage
 falls from 13,353 to 3,593. At the individual difficulty levels, this
 corresponds to planning-time reductions of 61.3\% and 63.7\%, and token
-reductions of 70.3\% and 75.3\%, for simple and normal scenarios,
+reductions of 70.3\% and 75.3\%, for simple and normal episodes,
 respectively. Figure~\ref{fig:planner-score-efficiency} summarizes this
 performance--efficiency trade-off: fine-tuning closes most of the score gap to
 the teacher while reducing both planning latency and token usage. These results

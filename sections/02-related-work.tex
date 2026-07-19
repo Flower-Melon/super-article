@@ -1,6 +1,104 @@
 % !TEX root = ../main.tex
 \section{Related Work}
 
-Survey related research here.
+\subsection{UAV-based Wildfire Response}
+
+UAVs provide a practical means of observing wildfires in hazardous and
+difficult-to-access areas, but operational wildfire response requires more than
+detecting fire in aerial imagery. It requires a decision chain that transforms
+observations into a current representation of the incident, allocates limited
+airborne resources to the resulting tasks, and updates the mission when the
+environment or fleet state changes. Existing work has made substantial progress
+on the individual stages of this chain, including aerial perception, active
+situation monitoring, autonomous flight planning, and multi-UAV coordination.
+
+At the perception stage, multimodal sensing improves the reliability of fire
+observations under the visually challenging conditions common in wildfire
+scenes. Thermal--RGB fusion has been used to detect fire and hotspots from UAV
+imagery, reducing sensitivity to smoke and illumination variation
+\citep{yuan2021uavfire}. Transformer-based aerial semantic segmentation further
+supports the interpretation of burned regions, vegetation, and terrain
+\citep{zhang2022uavtransformer}, while learning-based 3D reconstruction can
+provide geometric environmental models for navigation and inspection
+\citep{yang2022uav3dreconstruction}. These methods produce the visual and
+spatial evidence needed for response, but their outputs must still be converted
+into mission-level entities, such as fire points, task zones, and safety-relevant
+context, before they can drive rescue actions.
+
+Situation awareness and planning research addresses part of this conversion.
+Autonomous exploration and mapping enable UAVs to update knowledge of unknown
+or changing disaster environments \citep{popovic2021uavdisaster}; next-best-view
+planning selects viewpoints that maximize information gain and reduces
+observation uncertainty \citep{bircher2016nbv}. On the action side, deep
+reinforcement learning has been applied to autonomous navigation in unknown
+environments \citep{xiao2021uavrl}, and coverage path planning supports
+large-area search and perimeter scanning \citep{yu2022coverageuav}. However,
+these methods generally optimize sensing, navigation, or coverage as an
+individual capability. They do not by themselves produce a fleet-level,
+resource-constrained response plan that explicitly links evolving fire
+information to task priorities, payload use, endurance, and execution status.
+
+Multi-UAV methods extend decision making from a single vehicle to a team.
+Multi-agent reinforcement learning has demonstrated cooperative navigation and
+task allocation capabilities \citep{yang2023multiagentuav}, while the broader
+disaster-response literature highlights the value of UAV support and
+human--robot collaboration in search-and-rescue operations
+\citep{waharte2021uavsar}. Nevertheless, wildfire response remains difficult
+because fire evolution, communication changes, energy depletion, and vehicle
+failures can invalidate an initially feasible allocation. The literature is
+therefore still dominated by modular or open-loop solutions: perception,
+mapping, path planning, and coordination are often evaluated separately. In
+contrast, this work treats wildfire rescue as a closed-loop decision problem
+from aerial observation to structured fire-situation understanding,
+resource-constrained multi-UAV planning, validation, and local runtime
+replanning. This formulation connects the outputs of perception to executable
+team actions and preserves mission continuity under operational perturbations.
+
+\subsection{LLM-Based Robotic Agents}
+
+Large language models (LLMs) provide an increasingly capable interface between
+high-level human intent and robot behavior. Rather than replacing low-level
+perception or control modules, they are commonly used to interpret language,
+decompose goals, select skills, and reason over structured observations. This
+role is particularly relevant to wildfire response, where a decision system
+must translate a changing fire situation and operational constraints into a
+coherent fleet mission rather than execute a fixed motion policy.
+
+Language grounding and hierarchical planning are central directions in this
+area. SayCan combines language-model scoring with robot affordance estimates so
+that high-level instructions are grounded in executable skills
+\citep{ahn2022saycan}. Code as Policies uses language models to generate
+programmatic control policies, providing a flexible mechanism for composing
+robot behavior from functions and APIs \citep{liang2023codeaspolicies}.
+Related design guidance has shown how ChatGPT can be used to generate robot
+workflows while exposing tool descriptions and environmental constraints to the
+model \citep{vemprala2023chatgptrobotics}. Together, these approaches show that
+LLMs can support task decomposition and action sequencing, but they also make
+clear that generated actions require grounding and external feasibility checks.
+
+Embodied and multimodal models extend this reasoning interface to visual and
+physical state. RT-1 learns vision-language-action policies from large-scale
+real-robot data \citep{brohan2023rt1}, while PaLM-E incorporates visual inputs
+and robot states into an embodied language model \citep{driess2023palme}.
+Socratic Models further demonstrate zero-shot reasoning by composing
+specialized vision and language models \citep{zeng2023socratic}. These methods
+strengthen the connection between perception and action, yet they are generally
+evaluated on individual robots and predefined manipulation or navigation tasks.
+They do not directly address the resource-constrained allocation of dynamic,
+interdependent tasks across a rescue fleet.
+
+LLM-based agents have also explored closed-loop decision making through
+environmental feedback, navigation, and experience reuse. Inner Monologue uses
+language-based feedback to revise embodied plans \citep{huang2023innermonologue},
+and LM-Nav combines large pretrained models with semantic waypoints for
+open-world navigation \citep{shah2023lmnav}. Voyager couples an LLM agent with
+an automatic curriculum and a growing skill library for open-ended exploration
+\citep{wang2023voyager}. Nevertheless, these systems primarily target single-
+agent embodied environments. In contrast, our system applies LLM reasoning to
+multi-UAV wildfire response, coupling multimodal fire-situation understanding
+with constrained fleet-level planning, independent Validation, Episodic and
+Lesson Memory, and Runtime Replanning. The resulting design treats the LLM as a
+high-level decision component within a closed-loop safety and execution
+framework rather than as an unconstrained controller.
 
 \endinput

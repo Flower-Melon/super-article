@@ -1,24 +1,10 @@
 \section{Evaluation Suite Design}
 
 Existing datasets and evaluation settings only partially cover the closed-loop
-rescue decision chain defined in Section~3. Vision datasets cover aerial
-objects, fire, and smoke. They usually focus on detection, tracking,
-classification, or segmentation
-\cite{xia2018dota,zhu2022visdrone,mowla2024uavsffdb,shamsoshoara2021flame,han2024msfsdb}.
-They stop at visual understanding and do not evaluate downstream rescue decisions.
-Some evaluation settings move beyond perception.
-Wildfire VQA and disaster-oriented multi-agent benchmarks evaluate multimodal reasoning,
-task allocation, path planning, or coordinated response
-\cite{habibpour2026wildfirevqa,kleiner2013rmasbench}.
-However, these capabilities are generally tested in isolation rather than
-coupled into one rescue loop. Crisis-response benchmarks mainly focus on
-text-based situational assessment and humanitarian information classification,
-supporting macro-level awareness but not fine-grained UAV task execution
-\cite{alam2021crisisbench}. Consequently, existing settings do not jointly test
-the transition from aerial observation to fire-point detection and task-zone
-construction, resource-constrained fleet planning, and runtime replanning.
-Table~\ref{tab:benchmark_comparison} summarizes this comparison
-across four capability dimensions.
+rescue decision chain defined in Section~3. As summarized in
+Table~\ref{tab:benchmark_comparison}, no existing setting jointly evaluates the
+transition from aerial observation to task-zone construction,
+resource-constrained fleet planning, and runtime replanning.
 
 \input{tables/benchmark-capability-comparison}
 
@@ -30,7 +16,7 @@ runtime perturbations. Its design combines three complementary elements.
 
 First, real-to-sim calibration constrains simulated platforms, sensing, and
 mission conditions by the capabilities and safety limits of a real UAV. The
-resulting scenarios are therefore physically and operationally grounded rather
+resulting evaluation episodes are therefore physically and operationally grounded rather
 than arbitrarily configured. Second, difficulty stratification varies the
 complexity of fire-point layouts, fleet-resource conditions, and runtime perturbations
 while preserving a common task definition. It enables controlled comparison of
@@ -52,9 +38,9 @@ following sections detail these three elements.
 \subsection{Real-to-Sim Calibration}
 The first design property is realized through a co-design between the real UAV
 platform and the AirSim simulation environment. As stated above, real UAV
-parameters constrain every scenario. Accordingly, the real platform defines the
+parameters constrain every evaluation episode. Accordingly, the real platform defines the
 engineering boundary of the rescue mission, while AirSim configures controllable
-and repeatable scenarios within that boundary. Rather than treating the two as
+and repeatable evaluation episodes within that boundary. Rather than treating the two as
 separate experimental settings, we use the real platform to define the feasible
 set from which AirSim configures each simulated UAV and its environment.
 For each UAV, the configured mission must satisfy
@@ -77,7 +63,7 @@ reserve enforces a safe return; and the link bound is determined by the deployed
 communication configuration. Thus, the numerical bounds combine hardware
 specifications, flight-safety policy, and deployment configuration. Any
 configuration that violates
-Eq.~\ref{eq:uav-envelope} is excluded before scenario generation. The real UAV
+Eq.~\ref{eq:uav-envelope} is excluded before episode generation. The real UAV
 platform is shown in Figure~\ref{fig:UAV-platform}, and its hardware
 specifications are listed in Table~\ref{tab:real_uav_hardware}.
 
@@ -167,8 +153,9 @@ shortage.
 
 Runtime perturbations are enabled only in the hard and expert levels and are
 placed at predefined points in each episode so that replanning behavior can be
-evaluated under repeatable conditions. For each level, events are randomly
-drawn from the library according to its configured sampling distribution.
+evaluated under repeatable conditions. During suite construction, events are
+drawn once from the library according to the configured sampling distribution
+and then fixed within the evaluation episodes.
 Hard episodes contain a small number of temporally separated perturbations,
 whereas expert episodes contain more frequent perturbations that may occur
 concurrently or in succession and impose stronger communication and global

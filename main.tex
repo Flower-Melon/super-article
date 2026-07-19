@@ -18,7 +18,7 @@
 \hypersetup{hidelinks}
 
 % ------------------ Citations ------------------
-\usepackage[numbers,sort&compress]{natbib}
+\usepackage[authoryear,round]{natbib}
 
 % ------------------ Other useful packages ------------------
 \usepackage{caption}                     % Figure/table captions
@@ -48,8 +48,8 @@
 \makeatother
 
 % ------------------ Document info ------------------
-\title{Paper Title Goes Here}
-\author{Author One\thanks{Email: author1@example.com} \\
+\title{Closed-Loop LLM Agents for Multi-UAV Wildfire Rescue}
+\author{Author One \\
         Department, Institution, City, Postal Code, Country \\
         \and
         Author Two \\
@@ -60,12 +60,28 @@
 
 \maketitle
 
-    \begin{abstract}
-    Write your abstract here. The abstract should briefly summarize the research
-    background, objectives, methods, key results, and conclusions.
-    Typically 150--300 words, depending on the target journal's guidelines.
+\begin{abstract}
+Multi-UAV wildfire rescue requires closed-loop decisions that convert uncertain
+observations into executable fleet actions and adapt to changing conditions. We
+formulate wildfire rescue as a closed-loop decision problem spanning situation
+understanding, resource-constrained planning, validation, and runtime
+adaptation. Our modular large language model (LLM)-based agent framework
+combines Vision Analysis, Mission Planning, Episodic and Lesson Memory
+retrieval, independent Validation, and Runtime Replanning to generate and
+repair multi-UAV missions.
 
-    \noindent\textbf{Keywords:} keyword one; keyword two; keyword three; keyword four
+We evaluate the framework in a real-UAV-informed AirSim suite with 80 fixed
+evaluation episodes across four difficulty levels. Sensing, energy, payload, and
+communication constraints are calibrated from a physical platform. Experiments
+show that LLM-based agents enable closed-loop rescue decisions, with Memory and
+Runtime Replanning becoming more important as mission complexity increases. A
+fine-tuned Qwen3-8B planner retains 98.24\% of the Gemini~3.1~Pro teacher
+planner's average performance while substantially reducing planning overhead.
+These results support LLM agents as high-level decision components for adaptive
+multi-UAV wildfire response. The implementation is available at
+\url{https://github.com/tongsuhdyem/Pipeline}.
+
+\noindent\textbf{Keywords:} multi-UAV wildfire response; LLM agents; compact LLM fine-tuning; closed-loop decision making; real-to-sim evaluation
 \end{abstract}
 
 % ============================================================
@@ -83,7 +99,7 @@
 %  Bibliography
 % ============================================================
 
-\bibliographystyle{unsrtnat}
+\bibliographystyle{plainnat}
 \bibliography{references}
 
 % ============================================================
