@@ -9,8 +9,12 @@ Episodic and Lesson Memory, and Runtime Replanning. We also construct a
 real-UAV-informed AirSim evaluation suite containing 80 fixed episodes across
 four difficulty levels and six complementary mission metrics.
 
-Experiments with four foundation-model configurations show that model rankings
-change with episode difficulty: Gemini~3.1~Pro and Claude~Opus~4.7 perform
+Comparison with the Optimization-Based + Human baseline shows that conventional
+optimization matches LLM mission performance with substantially lower planning
+latency in simple and normal episodes, but loses its clear latency advantage
+when hard and expert episodes require runtime adaptation to natural-language
+perturbations.
+Among the four LLM configurations, Gemini~3.1~Pro and Claude~Opus~4.7 perform
 strongly at lower difficulty, while ChatGPT~5.5 leads in hard and expert
 episodes. Ablation results show that Validation provides an occasional
 reliability safeguard, Memory becomes increasingly valuable as resource and

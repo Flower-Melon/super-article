@@ -73,12 +73,15 @@ repair multi-UAV missions.
 We evaluate the framework in a real-UAV-informed AirSim suite with 80 fixed
 evaluation episodes across four difficulty levels. Sensing, energy, payload, and
 communication constraints are calibrated from a physical platform. Experiments
-show that LLM-based agents enable closed-loop rescue decisions, with Memory and
-Runtime Replanning becoming more important as mission complexity increases. A
-fine-tuned Qwen3-8B planner retains 98.24\% of the Gemini~3.1~Pro teacher
-planner's average performance while substantially reducing planning overhead.
-These results support LLM agents as high-level decision components for adaptive
-multi-UAV wildfire response. The implementation is available at
+show that a conventional optimization baseline matches LLM mission scores with
+much lower planning time in simple and normal episodes, whereas the LLM
+configurations achieve higher scores and generally lower replanning latency in
+hard and expert episodes. Ablations further show that Memory and Runtime
+Replanning become more important as mission complexity increases. A fine-tuned
+Qwen3-8B planner retains 98.24\% of the Gemini~3.1~Pro teacher planner's average
+performance while substantially reducing planning overhead. These results
+support LLM agents as high-level decision components for adaptive multi-UAV
+wildfire response. The implementation is available at
 \url{https://github.com/tongsuhdyem/Pipeline}.
 
 \noindent\textbf{Keywords:} multi-UAV wildfire response; LLM agents; compact LLM fine-tuning; closed-loop decision making; real-to-sim evaluation

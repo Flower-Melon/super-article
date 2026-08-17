@@ -6,21 +6,22 @@
 We evaluate the proposed system using the evaluation suite described in
 Section~4. The experiments comprise three complementary settings. The first
 assesses the end-to-end system with different general-purpose foundation
-models under controlled mission conditions of varying difficulty. The second
+models and a conventional planning baseline. The second
 examines the contribution of the main system components through ablation. The
 third investigates whether a compact model specialized with domain decision
 traces can replace the general-purpose model in Mission Planning.
 
-To isolate the influence of the foundation model on plan generation,
-validation, and runtime adaptation, we fix Gemini~3.1~Pro as the foundation
-model for Vision Analysis in the first setting. We then evaluate four
-configurations by using ChatGPT~5.5, Gemini~3.1~Pro, Claude~Opus~4.7, and
-DeepSeek~V4~Pro, respectively, in the remaining LLM-based modules. This design
-keeps the transformation from aerial imagery to the structured fire situation
-consistent across configurations, allowing their subsequent differences to
-reflect the models used in Mission Planning, Semantic Validation, and Runtime
-Replanning. Each configuration is evaluated on the same 80 episodes, comprising
-20 episodes at each of the simple, normal, hard, and expert difficulty levels.
+In the first setting, we fix Gemini~3.1~Pro for Vision Analysis and compare four
+LLM-based configurations---using ChatGPT~5.5, Gemini~3.1~Pro,
+Claude~Opus~4.7, and DeepSeek~V4~Pro in the remaining LLM-based modules---with
+an Optimization-Based + Human baseline under the same visual-analysis output,
+UAV states, action space, execution environment, episodes, and scoring
+procedure. The baseline uses an OR-Tools CP-SAT planner in the simple and
+normal settings; in the hard and expert settings, the same planner generates
+the initial plan and a human operator revises it after each natural-language
+runtime perturbation. Each configuration is evaluated on the same 80 episodes,
+with 20 at each difficulty level. Planning time reports the average time
+required to produce a valid plan.
 
 For the second setting, we use the DeepSeek~V4~Pro configuration and compare the
 full system with three ablated variants: w/o Validation, w/o Memory, and w/o
@@ -62,69 +63,69 @@ this experiment does not invoke Runtime Replanning or assess event stability.
 The comparison therefore isolates the effect of planner fine-tuning on the
 same episode subset.
 
-\subsection{Foundation Model Comparison}
+\subsection{Foundation Model and Baseline Comparison}
 
-Table~\ref{tab:main-results} summarizes the end-to-end results for all four
-foundation-model configurations and difficulty levels, while
-Figure~\ref{fig:model-total-score} provides a direct comparison of their
-overall scores. The leading configuration depends on episode difficulty:
-Gemini~3.1~Pro and Claude~Opus~4.7 obtain the strongest scores in the simple
-and normal settings, whereas ChatGPT~5.5 leads in the hard and expert settings
-with scores of 65.09 and 40.15, respectively. Averaged over the four
-difficulty levels, Claude~Opus~4.7 obtains the highest overall score of 71.67,
-followed by Gemini~3.1~Pro (70.64), ChatGPT~5.5 (70.53), and DeepSeek~V4~Pro
-(68.68). The changing ordering indicates that model performance depends on the
-type and intensity of episode pressure rather than following one fixed
-ranking across all difficulty levels.
+Table~\ref{tab:main-results} compares the Optimization-Based + Human baseline
+with the four LLM-based configurations across all difficulty levels.
+
+\input{tables/foundation-model-results}
+
+In the simple and normal settings, which contain no runtime perturbations, the
+baseline scores 92.59 and 88.72, within the corresponding LLM ranges, while
+requiring only 3.42 and 5.68~s for planning. These times are 88.4\% and 85.5\%
+lower than those of the fastest LLM at the respective difficulty levels. In the
+hard and expert settings, the baseline scores fall to 49.77 and 21.53, which
+are 9.26 and 16.02 points below the weakest LLM, while planning time increases
+to 125.65 and 339.85~s. The hard value exceeds three of the four LLM
+configurations, and the expert value exceeds all four. The clear latency
+advantage observed in the fixed episodes therefore does not carry over to the
+episodes that require runtime replanning.
+
+Figure~\ref{fig:model-total-score} summarizes the total scores and planning
+times of all five configurations, while
+Figure~\ref{fig:model-performance-radar} compares their mission-level profiles.
+Among the LLM configurations, Gemini~3.1~Pro and Claude~Opus~4.7 perform best
+in the simple and normal settings, whereas ChatGPT~5.5 leads the hard and
+expert settings with scores of 65.09 and 40.15 and retains the most balanced
+profile. Averaged over all four levels, Claude~Opus~4.7 obtains the highest LLM
+score of 71.67, followed by Gemini~3.1~Pro (70.64), ChatGPT~5.5 (70.53), and
+DeepSeek~V4~Pro (68.68). DeepSeek~V4~Pro records the lowest coordination and
+mission-time scores among the LLM configurations in both the hard and expert
+settings. The Optimization-Based + Human baseline averages 63.15, primarily
+because of its lower hard and expert scores. The changing ordering shows that
+no LLM configuration dominates across all levels of episode pressure.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/foundation-model-overall-scores.png}
-    \caption{Overall scores of the four foundation-model configurations across
-    episode difficulty levels.}
+    \caption{Total scores and planning times of the Optimization-Based + Human
+    baseline and four LLM-based configurations across episode difficulty
+    levels. Higher is better for total score, whereas lower is better for
+    planning time.}
     \label{fig:model-total-score}
 \end{figure}
-
-\input{tables/foundation-model-results}
-
-All configurations complete nearly all objectives in the simple, normal, and
-hard settings, indicating that the proposed pipeline reliably converts the
-shared visual analysis into executable missions. The performance gap instead
-arises primarily from execution quality. The advantage shifts toward
-ChatGPT~5.5 in the hard and expert settings, where response, resource-pressure,
-coordination, and event-stability scores become more important. In the simple
-and normal settings, Gemini~3.1~Pro and Claude~Opus~4.7 remain stronger on
-several execution metrics. This pattern suggests that model differences emerge
-primarily in how the configurations handle increasing temporal, resource, and
-runtime pressure rather than in basic task completion.
-
-Figure~\ref{fig:model-performance-radar} further compares the six
-mission-level metrics. In the simple and normal settings, the model profiles
-largely overlap near the outer region of the plots, although differences in
-time efficiency and coordination are already visible. The profiles separate
-more clearly in the hard and expert settings, where ChatGPT~5.5 retains the
-largest and most balanced coverage. Claude~Opus~4.7 is the strongest alternative
-in the simple and normal settings, whereas DeepSeek~V4~Pro shows the largest
-losses in coordination and time efficiency as episode pressure increases.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/foundation-model-performance-radar.png}
-    \caption{Mission-level performance profiles of the four foundation-model
-    configurations at each difficulty level. Larger radial values indicate
-    better performance.}
+    \caption{Mission-level performance profiles of the Optimization-Based +
+    Human baseline and four LLM-based configurations at each difficulty level.
+    Larger radial values indicate better performance. Event stability is
+    omitted from the simple and normal settings because they contain no runtime
+    perturbations.}
     \label{fig:model-performance-radar}
 \end{figure}
 
-Increasing episode difficulty nevertheless degrades every configuration.
-The most pronounced changes occur in mission time and event stability: time
-scores fall to 3.54--13.23 in expert episodes, while event-stability scores
-fall to 0--2.67. By contrast, expert-level completion remains above 90 for all
-models. Thus, the principal challenge in the hardest episodes is not whether
-the system can eventually address the rescue objectives, but whether it can do
-so efficiently while preserving mission continuity under repeated runtime
-perturbations. These results also expose clear headroom for more robust
-replanning and time-aware resource allocation.
+Taken together, the results suggest a practical division between the two
+planning approaches under the evaluated conditions. Conventional optimization
+offers comparable mission quality with much lower latency in the fixed simple
+and normal episodes. In the hard and expert episodes, where greater operational
+pressure is coupled with natural-language runtime perturbations, the LLM
+configurations maintain higher mission scores and generally lower replanning
+latency than the human-assisted baseline. The comparison therefore does not
+establish the universal superiority of either approach; rather, it identifies
+adaptive event interpretation and plan revision as the setting in which LLM
+planning provides its clearest advantage.
 
 \FloatBarrier
 

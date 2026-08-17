@@ -20,6 +20,7 @@
 
 # Reference data
 reference/
+tmp/
 
 # OS files
 Thumbs.db
