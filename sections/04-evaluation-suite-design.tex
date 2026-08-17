@@ -1,27 +1,35 @@
 \section{Evaluation Suite Design}
 
-Existing datasets and evaluation settings only partially cover the closed-loop
-rescue decision chain defined in Section~3. As summarized in
-Table~\ref{tab:benchmark_comparison}, no existing setting jointly evaluates the
-transition from aerial observation to task-zone construction,
-resource-constrained fleet planning, and runtime replanning. This comparison
+The evaluation suite is designed to test whether high-level closed-loop
+decision making with the LLM-centered closed-loop decision framework remains
+effective as operational pressure increases. This requires more than evaluating
+perception, planning, or replanning separately. Existing datasets and
+evaluation settings only
+partially cover the closed-loop rescue decision chain defined in Section~3. As
+summarized in Table~\ref{tab:benchmark_comparison}, no existing setting jointly
+evaluates the transition from aerial observation to task-zone construction,
+resource-constrained mission planning, and runtime replanning. This comparison
 concerns evaluation coverage rather than algorithmic performance.
 
 \input{tables/benchmark-capability-comparison}
 
 To close this gap, we instantiate the task model of Section~3 as a controlled,
 real-UAV-informed evaluation suite in AirSim. The suite evaluates whether a
-system can complete the full rescue loop within a single episode, from aerial
-fire-situation understanding to an executable plan and its adaptation after
-runtime perturbations. Its design combines three complementary elements.
+system can complete the full rescue loop within a single episode, from
+fire-situation understanding to an executable plan and runtime replanning after
+perturbations. The suite separately exposes task completion, execution quality,
+and mission continuity, preventing high task completion from being interpreted
+as uniformly effective execution under pressure. Its design combines three
+complementary elements.
 
 First, real-to-sim calibration constrains simulated platforms, sensing, and
 mission conditions by the capabilities and safety limits of a real UAV. The
 resulting evaluation episodes are therefore physically and operationally grounded rather
 than arbitrarily configured. Second, difficulty stratification varies the
-complexity of fire-point layouts, fleet-resource conditions, and runtime perturbations
-while preserving a common task definition. It enables controlled comparison of
-models as closed-loop demands increase. Third, mission-level metrics assess the
+complexity of fire-point layouts, fleet-resource conditions, scheduling
+interactions, and runtime perturbations while preserving a common task
+definition. It enables controlled comparison of models and system mechanisms as
+operational pressure increases. Third, mission-level metrics assess the
 outcome of the complete rescue process from complementary operational
 perspectives, rather than collapsing performance into a single score. The
 following sections detail these three elements.
@@ -95,22 +103,31 @@ The second design property is that each evaluation episode is purpose-built
 rather than randomly sampled.
 Each episode instantiates the task variables defined in Section~3 through three
 controlled dimensions: fleet and resource conditions, fire-point layouts, and,
-where applicable, runtime perturbations. Their combinations define four stress-testing difficulty levels in
-Table~\ref{tab:scenario-controls}.
-Each difficulty level is instantiated by a fixed set of 20 evaluation episodes, yielding
-80 episodes in total.
+where applicable, runtime perturbations. Their combinations define four
+stress-testing difficulty levels in Table~\ref{tab:scenario-controls}. Each
+difficulty level is instantiated by a fixed set of 20 evaluation episodes,
+yielding 80 episodes in total.
+
+The four levels form a staged operational-pressure axis rather than four
+unrelated scenario groups. The simple and normal levels test fire-situation
+understanding and resource-constrained mission planning under progressively
+tighter initial conditions. The hard and expert levels retain these pressures
+while adding runtime perturbations and stronger scheduling interactions. This
+progression makes episode difficulty useful not only for measuring end-to-end
+degradation, but also for identifying when Validation, Memory, and Runtime
+Replanning become consequential.
 
 \input{tables/scenario-difficulty-controls}
 
-The fleet and resource conditions in every evaluation episode is constrained by the
+The fleet and resource conditions in every evaluation episode are constrained by the
 real-to-sim calibration in Section~4.1. In particular, each simulated UAV must
 satisfy the feasible operating envelope in Eq.~\ref{eq:uav-envelope}, and its
 imaging, energy, payload, and communication settings follow
 Table~\ref{tab:real_to_sim_calibration}. Difficulty is therefore varied only
 within the engineering and operational limits established for the real platform.
 
-The fire-point configuration of all episode is pre-specified rather than
-randomly generated. These configuration controls the scene structure
+The fire-point configurations of all episodes are pre-specified rather than
+randomly generated. These configurations control the scene structure
 and the spatial arrangement and number of fire points per task zone across
 difficulty levels.
 Figure~\ref{fig:difficulty-scene-examples} provides representative scenes from
@@ -256,5 +273,11 @@ controls the strength of the difficulty reward. The normalization by
 $1+\lambda$ ensures that $S_d\in[0,100]$. The component scores remain
 available for diagnostic analysis, while $S_d$ provides a unified measure for
 overall comparison.
+
+Together, the staged episode difficulty and decomposed metrics provide a common
+basis for testing the three questions examined next: whether the complete
+framework sustains high-level closed-loop decision making, which mechanisms
+matter as operational pressure increases, and how much capability for
+resource-constrained mission planning can be retained by a compact planner.
 
 \endinput

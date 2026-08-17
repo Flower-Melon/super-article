@@ -1,37 +1,41 @@
 % !TEX root = ../main.tex
 \section{Conclusion}
 
-This paper formulates multi-UAV wildfire rescue as a closed-loop decision
-problem connecting aerial situation understanding, resource-constrained
-planning, and runtime adaptation. Based on this formulation, we develop a
-modular system that integrates Vision Analysis, Mission Planning, Validation,
-Episodic and Lesson Memory, and Runtime Replanning. We also construct a
-real-UAV-informed AirSim evaluation suite containing 80 fixed episodes across
-four difficulty levels and six complementary mission metrics.
+Within the task and evaluation setting studied here, the results support the
+use of LLMs as the high-level closed-loop decision core of a
+resource-constrained multi-UAV wildfire rescue system. This capability is not
+uniformly robust: the complete decision loop remains effective in terms of
+basic task completion, but execution quality and mission continuity deteriorate
+as operational pressure increases. The proposed LLM-centered closed-loop
+decision framework addresses this problem by connecting fire-situation
+understanding and resource-constrained mission planning with Validation,
+Memory, and Runtime Replanning.
 
-Across four downstream foundation-model configurations, the complete framework
-maintains high basic task completion, while execution quality and mission
-continuity decline as operational pressure increases. Controlled ablations
-show that Validation provides an occasional reliability safeguard, Memory
-becomes increasingly valuable as resource and scheduling pressure grows, and
-Runtime Replanning is critical under dynamic perturbations. Fine-tuning
-Qwen3-8B with validated planning demonstrations retains 98.24\% of the
-Gemini~3.1~Pro planner's average score on simple and normal episodes, while
-reducing mean planning time by approximately 63\% and planning-token usage by
-73\%. These results support lower-cost local deployment of the initial planning
-module.
+Three sets of evidence support this conclusion. First, the complete framework
+maintains high basic task completion across four downstream foundation-model
+configurations, showing that end-to-end operation is not confined to one
+downstream model, although all configurations lose execution quality under
+greater operational pressure. Second, the ablations show condition-dependent
+roles: Validation provides an occasional reliability safeguard, Memory becomes
+increasingly valuable as resource and scheduling interactions intensify, and
+Runtime Replanning is critical when perturbations invalidate an active plan.
+Third, Qwen3-8B fine-tuned with validated planning demonstrations retains
+98.24\% of the Gemini~3.1~Pro teacher planner's average score on simple and
+normal episodes, while reducing mean planning time by approximately 63\% and
+planning-token usage by 73\%. This final result supports lower-cost local
+deployment of Mission Planning within the evaluated setting.
 
-The current evidence remains limited to a calibrated simulation, a fixed
-episode set, and one real-platform configuration. Moreover, the specialized
+This answer remains limited to a calibrated simulation, a fixed
+episode set, and one real-platform configuration. Moreover, the compact
 planner has not yet been evaluated under hard and expert runtime conditions.
 The evaluation also does not include a direct numerical comparison with an
 external end-to-end rescue method because existing systems assume different
 inputs, action spaces, resource constraints, and evaluation protocols. The
 reported evidence therefore supports the framework within the task and
-evaluation setting defined here, rather than establishing general superiority
-over traditional planning methods. Future work will extend the evaluation to
+evaluation setting defined here. Future work will extend the evaluation to
 real-flight and mixed real--sim trials, more diverse platforms and fire
 dynamics, and larger fleets, while developing more selective memory retrieval
-and more robust, efficient replanning for high-pressure missions.
+and more robust, efficient replanning for missions under high operational
+pressure.
 
 \endinput

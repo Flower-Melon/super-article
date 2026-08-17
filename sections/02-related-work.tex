@@ -1,16 +1,20 @@
 % !TEX root = ../main.tex
 \section{Related Work}
 
-\subsection{UAV-based Wildfire Response}
+\subsection{UAV-Based Wildfire Rescue}
 
 UAVs provide a practical means of observing wildfires in hazardous and
-difficult-to-access areas, but operational wildfire response requires more than
+difficult-to-access areas, but operational wildfire rescue requires more than
 detecting fire in aerial imagery. It requires a decision chain that transforms
 observations into a current representation of the incident, allocates limited
 airborne resources to the resulting tasks, and updates the mission when the
-environment or fleet state changes. Existing work has made substantial progress
-on the individual stages of this chain, including aerial perception, active
-situation monitoring, autonomous flight planning, and multi-UAV coordination.
+environment or fleet state changes. Two properties distinguish this problem
+from a collection of independent UAV capabilities. Decisions at one stage
+constrain the next stage, and decisions that are valid initially may cease to be
+valid during execution. Existing work has made substantial progress on the
+individual stages of this chain, including aerial perception, active situation
+monitoring, autonomous flight planning, and multi-UAV coordination, but the
+connection among these stages remains less developed.
 
 At the perception stage, multimodal sensing improves the reliability of fire
 observations under the visually challenging conditions common in wildfire
@@ -21,9 +25,12 @@ supports the interpretation of burned regions, vegetation, and terrain
 \citep{zhang2022uavtransformer}, while learning-based 3D reconstruction can
 provide geometric environmental models for navigation and inspection
 \citep{yang2022uav3dreconstruction}. These methods produce the visual and
-spatial evidence needed for response, but their outputs must still be converted
+spatial evidence needed for rescue, but their outputs must still be converted
 into mission-level entities, such as fire points, task zones, and safety-relevant
-context, before they can drive rescue actions.
+context, before they can drive rescue actions. This conversion is consequential:
+perception determines what the planner treats as a task, yet perception quality
+alone does not indicate whether the resulting tasks can be assigned to a
+resource-limited fleet or sustained throughout execution.
 
 Situation awareness and planning research addresses part of this conversion.
 Autonomous exploration and mapping enable UAVs to update knowledge of unknown
@@ -35,29 +42,38 @@ environments \citep{xiao2021uavrl}, and coverage path planning supports
 large-area search and perimeter scanning \citep{yu2022coverageuav}. However,
 these methods generally optimize sensing, navigation, or coverage as an
 individual capability. They do not by themselves produce a fleet-level,
-resource-constrained response plan that explicitly links evolving fire
+resource-constrained mission plan that explicitly links evolving fire
 information to task priorities, payload use, endurance, and execution status.
+In particular, optimizing where a UAV should observe or fly is different from
+deciding which combination of vehicles, routes, and payloads should serve
+multiple interdependent zones under a common mission objective.
 
 Multi-UAV methods extend decision making from a single vehicle to a team.
 Multi-agent reinforcement learning has demonstrated cooperative navigation and
 task allocation capabilities \citep{yang2023multiagentuav}, while the broader
 disaster-response literature highlights the value of UAV support and
 human--robot collaboration in search-and-rescue operations
-\citep{waharte2021uavsar}. Nevertheless, wildfire response remains difficult
+\citep{waharte2021uavsar}. Nevertheless, wildfire rescue remains difficult
 because fire evolution, communication changes, energy depletion, and vehicle
 failures can invalidate an initially feasible allocation. The literature is
 therefore still dominated by modular or open-loop solutions: perception,
-mapping, path planning, and coordination are often evaluated separately. In
-addition to addressing different stages of the decision chain, these methods
-assume different inputs, outputs, resource models, and evaluation protocols.
-Their reported results therefore provide references for individual
-capabilities but do not constitute a directly comparable end-to-end numerical
-baseline for the task studied here. In contrast, this work treats wildfire
-rescue as a closed-loop decision problem from aerial observation to structured
-fire-situation understanding, resource-constrained multi-UAV planning,
-validation, and local runtime replanning. This formulation connects the outputs
-of perception to executable team actions and preserves mission continuity
-under operational perturbations.
+mapping, path planning, and coordination are often evaluated separately, and
+task allocation is commonly assessed from a fixed initial state. This leaves a
+gap between initial coordination and mission continuity: a method may produce a
+valid allocation at one instant without specifying how the fleet should recover
+when the task set, vehicle state, or resource constraints change.
+
+The methods reviewed above also assume different inputs, outputs, resource
+models, and evaluation protocols. Their reported results provide useful
+references for individual capabilities, but do not constitute a directly
+comparable end-to-end numerical baseline for a task that begins with aerial
+observations and continues through resource-constrained mission planning and
+runtime replanning.
+The relevant gap is therefore not the absence of perception, planning, or
+coordination algorithms in isolation. It is the absence of a common high-level
+decision loop that connects these capabilities and exposes how resource
+constraints and dynamic events propagate from fire-situation understanding to
+fleet execution.
 
 \subsection{LLM-Based Robotic Agents}
 
@@ -65,9 +81,12 @@ Large language models (LLMs) provide an increasingly capable interface between
 high-level human intent and robot behavior. Rather than replacing low-level
 perception or control modules, they are commonly used to interpret language,
 decompose goals, select skills, and reason over structured observations. This
-role is particularly relevant to wildfire response, where a decision system
+role is particularly relevant to wildfire rescue, where a decision system
 must translate a changing fire situation and operational constraints into a
-coherent fleet mission rather than execute a fixed motion policy.
+coherent fleet mission rather than execute a fixed motion policy. For such a
+role, generative flexibility is only one requirement. The resulting decisions
+must also be grounded in available capabilities, checked against operational
+constraints, and revised when feedback invalidates their assumptions.
 
 Language grounding and hierarchical planning are central directions in this
 area. SayCan combines language-model scoring with robot affordance estimates so
@@ -80,6 +99,9 @@ workflows while exposing tool descriptions and environmental constraints to the
 model \citep{vemprala2023chatgptrobotics}. Together, these approaches show that
 LLMs can support task decomposition and action sequencing, but they also make
 clear that generated actions require grounding and external feasibility checks.
+This distinction is central in multi-UAV missions: linguistic coherence does
+not guarantee that a set of assignments respects endurance, payload,
+communication, priority, and safety constraints simultaneously.
 
 Embodied and multimodal models extend this reasoning interface to visual and
 physical state. RT-1 learns vision-language-action policies from large-scale
@@ -89,21 +111,35 @@ Socratic Models further demonstrate zero-shot reasoning by composing
 specialized vision and language models \citep{zeng2023socratic}. These methods
 strengthen the connection between perception and action, yet they are generally
 evaluated on individual robots and predefined manipulation or navigation tasks.
-They do not directly address the resource-constrained allocation of dynamic,
-interdependent tasks across a rescue fleet.
+They do not directly address resource-constrained mission planning for dynamic,
+interdependent tasks across a rescue fleet. Moving from an individual embodied
+agent to a fleet-level decision layer introduces coupling among vehicle states,
+task priorities, routes, and shared resources, so an action that is feasible for
+one vehicle may still be unsuitable for the mission as a whole.
 
 LLM-based agents have also explored closed-loop decision making through
-environmental feedback, navigation, and experience reuse. Inner Monologue uses
-language-based feedback to revise embodied plans \citep{huang2023innermonologue},
+environmental feedback, navigation, and accumulated experience. Inner Monologue
+uses language-based feedback to revise embodied plans
+\citep{huang2023innermonologue},
 and LM-Nav combines large pretrained models with semantic waypoints for
 open-world navigation \citep{shah2023lmnav}. Voyager couples an LLM agent with
 an automatic curriculum and a growing skill library for open-ended exploration
 \citep{wang2023voyager}. Nevertheless, these systems primarily target single-
-agent embodied environments. In contrast, our system applies LLM reasoning to
-multi-UAV wildfire response, coupling multimodal fire-situation understanding
-with constrained fleet-level planning, independent Validation, Episodic and
-Lesson Memory, and Runtime Replanning. The resulting design treats the LLM as a
-high-level decision component within a closed-loop safety and execution
-framework rather than as an unconstrained controller.
+agent embodied environments. They establish that feedback and accumulated
+experience can improve sequential behavior, but do not establish how these
+ideas should be combined with fleet-wide resource constraints or how their
+importance changes as operational pressure increases in multi-UAV missions.
+
+Taken together, the literature provides the main ingredients for high-level
+robot decision making, but not their integration around the specific failure
+modes of dynamic, resource-constrained fleet missions. An LLM-centered
+closed-loop decision framework for this setting must satisfy three requirements
+beyond generating an initial plan. It must reject plans that violate operational
+or tactical constraints, retrieve relevant experience when resource and scheduling
+interactions make planning less routine, and repair the active mission when
+execution feedback changes the underlying state. These requirements motivate a
+closed-loop framework in which Validation, Memory, and Runtime Replanning are
+not independent additions, but complementary mechanisms for sustaining
+high-level decision making from initial observation through execution.
 
 \endinput

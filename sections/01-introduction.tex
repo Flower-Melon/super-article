@@ -9,46 +9,87 @@ into task zones, assigned across a resource-limited fleet, and revised as the
 fire or UAV state changes. Multi-UAV wildfire rescue is therefore a closed-loop
 decision problem rather than an isolated perception or path-planning task.
 
-Existing work has advanced fire detection, aerial scene understanding, and
-damage assessment, but transforming observations into coordinated response
-actions remains challenging \citep{erdelj2017help}. A practical plan must
-respect energy, payload, communication, safety, and priority constraints
-\citep{floreano2015science}, while accommodating fire evolution, UAV faults,
-and resource shortages. Large language models (LLMs) and multimodal LLMs offer
-a flexible interface for connecting visual interpretation, task decomposition,
+The difficulty lies in satisfying two requirements at the same time. First, an
+initial mission must be feasible for the current fleet. Task priorities must be
+matched to vehicle locations, endurance, payload, communication, and safety
+limits \citep{floreano2015science}; otherwise, a semantically plausible plan may
+still be impossible to execute. Second, feasibility is temporary. Fire
+evolution, resource consumption, communication changes, and UAV faults can
+invalidate assignments that were valid when they were generated. A useful
+decision system must therefore reason not only about what the fleet should do
+now, but also about how the mission should be revised after the operational
+state changes. Initial resource-constrained mission planning and runtime
+replanning are coupled parts of the same decision problem.
+
+Existing work has advanced fire detection, aerial scene understanding, damage
+assessment, navigation, and multi-UAV coordination
+\citep{erdelj2017help}. These capabilities provide essential parts of a rescue
+system, but they are commonly developed and evaluated as separate stages. As a
+result, strong perception does not by itself establish that detected fire
+conditions can be converted into a feasible fleet mission, while a feasible
+initial mission plan does not establish that the mission can remain effective
+under subsequent perturbations. The unresolved challenge is the high-level
+decision layer that connects fire-situation understanding,
+resource-constrained mission planning, execution feedback, and runtime
+replanning within one continuous loop.
+
+Large language models (LLMs) and multimodal LLMs offer a flexible interface for
+this layer because they can connect visual interpretation, task decomposition,
 and high-level planning \citep{driess2023palme}. However, free-form generation
-is insufficient for safety-critical missions: plans can violate fleet constraints
-or become invalid when execution conditions change.
+alone is insufficient for a resource-constrained, safety-relevant mission. An
+LLM may produce a coherent plan that violates fleet constraints, overlook a
+relevant lesson from a previous case, or continue to rely on an obsolete plan
+after execution conditions change. The central question of this work is
+therefore whether LLMs can serve as the high-level closed-loop decision core of
+a multi-UAV wildfire rescue system, and how Validation, Memory, and Runtime
+Replanning sustain that role as operational pressure increases.
 
-We formulate multi-UAV wildfire rescue as a decision chain from aerial
-observation to fire-situation understanding, resource-constrained planning, and
-runtime adaptation. Our modular system combines Vision Analysis, Mission
-Planning, Semantic and Deterministic Validation, Episodic and Lesson Memory,
-and Runtime Replanning. It converts aerial imagery into fire points and task
-zones, generates an executable plan, and uses retrieved cases and lessons to
-support initial planning and fault-driven repair.
+We address this question by formulating multi-UAV wildfire rescue as a decision
+loop from aerial observation to fire-situation understanding,
+resource-constrained mission planning, Validation, execution feedback, and
+Runtime Replanning.
+The resulting LLM-centered closed-loop decision framework uses Vision Analysis
+and Mission Planning to transform observations into an initial fleet mission,
+but its design is organized around the risks that one-shot generation alone
+cannot address. Semantic Validation and Deterministic Rule Validation guard
+against plans that are infeasible or tactically implausible. Episodic and Lesson
+Memory retrieve prior cases and distilled guidance when the current
+mission-planning problem becomes less routine. Runtime Replanning responds to
+changes in the fire, fleet, resources, or schedule by repairing the active
+mission. Together, these mechanisms turn LLM planning from a one-shot output
+into a decision process that can be checked, informed by experience, and
+revised during execution.
 
-To evaluate this capability, we construct a real-UAV-informed AirSim suite that
-assesses understanding, constrained planning, and adaptation under runtime
-perturbations. It calibrates observation, energy, payload, and communication
-conditions from a real platform, organizes 80 fixed evaluation episodes into
-four difficulty levels, and measures completion, response, mission time, event stability,
-resource pressure, and coordination.
+To evaluate the resulting closed-loop capability, we construct a
+real-UAV-informed AirSim suite that progressively increases operational
+pressure. Observation, energy, payload, and communication conditions are
+calibrated from a real platform, while 80 fixed evaluation episodes are
+organized into four difficulty levels. The lower levels emphasize
+fire-situation understanding and resource-constrained mission planning; the
+higher levels introduce stronger operational pressure through tighter resource
+and scheduling conditions together with runtime perturbations.
+Six mission-level metrics separate task completion from response, mission time,
+event stability, resource pressure, and coordination, allowing the evaluation
+to distinguish whether a system completes the rescue tasks from how
+well it preserves execution quality and mission continuity.
 
 The main contributions of this work are summarized as follows:
 \begin{enumerate}[leftmargin=1.6em,itemsep=2pt,topsep=3pt]
-    \item We develop a modular LLM-based rescue system that integrates
-    Vision Analysis, constrained multi-UAV Mission Planning, independent
-    Validation, Episodic and Lesson Memory, and Runtime Replanning.
-    \item We construct a real-UAV-informed AirSim evaluation suite with four
-    difficulty levels and six mission-level metrics for end-to-end assessment
-    under controlled operational pressure.
+    \item We formulate resource-constrained multi-UAV wildfire rescue as a
+    high-level closed-loop decision problem and develop an LLM-centered
+    closed-loop decision framework that connects fire-situation understanding
+    and resource-constrained mission planning with Validation, Memory, and
+    Runtime Replanning.
+    \item We construct a real-UAV-informed AirSim evaluation suite that exposes
+    the decision loop to controlled increases in operational pressure through
+    resource limitations, scheduling constraints, and runtime perturbations
+    across four difficulty levels, and measures both task completion and
+    execution quality with six mission-level metrics.
     \item We evaluate end-to-end behavior across multiple foundation-model
-    configurations to examine sensitivity to model choice. Through controlled
-    ablations, we then characterize the contributions of Validation, Memory,
-    and Runtime Replanning, and assess whether a compact planner specialized
-    with validated demonstrations can retain strong mission performance with
-    lower planning overhead.
+    configurations, characterize through controlled ablations how Validation,
+    Memory, and Runtime Replanning contribute as operational pressure increases,
+    and assess whether validated demonstrations can specialize a compact
+    planner with lower planning overhead.
 \end{enumerate}
 
 \endinput

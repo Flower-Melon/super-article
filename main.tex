@@ -61,29 +61,30 @@
 \maketitle
 
 \begin{abstract}
-Multi-UAV wildfire rescue requires closed-loop decisions that convert uncertain
-observations into executable fleet actions and adapt to changing conditions. We
-formulate wildfire rescue as a closed-loop decision problem spanning situation
-understanding, resource-constrained planning, validation, and runtime
-adaptation. Our modular large language model (LLM)-based agent framework
-combines Vision Analysis, Mission Planning, Episodic and Lesson Memory
-retrieval, independent Validation, and Runtime Replanning to generate and
-repair multi-UAV missions.
+Multi-UAV wildfire rescue requires uncertain aerial observations to be
+translated into fleet missions that satisfy resource and safety constraints and
+remain effective as operational conditions change. We investigate whether
+large language models (LLMs) can serve as the high-level closed-loop decision
+core of such a system.
 
-We evaluate the framework in a real-UAV-informed AirSim suite spanning four
-difficulty levels. Sensing, energy, payload, and
-communication constraints are calibrated from a physical platform. Across four
-downstream foundation-model configurations, the framework maintains high basic
-task completion, while execution quality declines as operational pressure
-increases. Controlled ablations show that Memory and Runtime Replanning become
-more important as mission complexity increases. A fine-tuned Qwen3-8B planner
-retains 98.24\% of the Gemini~3.1~Pro teacher planner's average performance while
-substantially reducing planning overhead. These results characterize the role
-of LLM agents as high-level decision components for adaptive multi-UAV wildfire
-response. The implementation is available at
+We formulate wildfire rescue as a closed-loop decision problem. The resulting
+LLM-centered closed-loop decision framework integrates fire-situation
+understanding and resource-constrained mission planning with Validation,
+Memory, and Runtime Replanning. It is evaluated in a real-UAV-informed AirSim
+suite spanning four difficulty levels.
+
+Across four downstream foundation-model configurations, the framework maintains
+high basic task completion, although execution quality declines as operational
+pressure increases. Controlled ablations show that Validation, Memory, and
+Runtime Replanning provide complementary benefits at different levels of
+operational pressure. On simple and normal episodes, a fine-tuned Qwen3-8B
+planner retains 98.24\% of the Gemini~3.1~Pro teacher planner's average
+score while substantially reducing planning overhead. These results
+characterize the potential and limitations of LLMs for high-level closed-loop
+decision making in adaptive multi-UAV wildfire rescue. The implementation is available at
 \url{https://github.com/tongsuhdyem/Pipeline}.
 
-\noindent\textbf{Keywords:} multi-UAV wildfire response; LLM agents; compact LLM fine-tuning; closed-loop decision making; real-to-sim evaluation
+\noindent\textbf{Keywords:} multi-UAV wildfire rescue; LLM agents; compact planner fine-tuning; high-level closed-loop decision making; real-to-sim evaluation
 \end{abstract}
 
 % ============================================================
