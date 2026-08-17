@@ -9,24 +9,29 @@ Episodic and Lesson Memory, and Runtime Replanning. We also construct a
 real-UAV-informed AirSim evaluation suite containing 80 fixed episodes across
 four difficulty levels and six complementary mission metrics.
 
-Experiments with four foundation-model configurations show that model rankings
-change with episode difficulty: Gemini~3.1~Pro and Claude~Opus~4.7 perform
-strongly at lower difficulty, while ChatGPT~5.5 leads in hard and expert
-episodes. Ablation results show that Validation provides an occasional
-reliability safeguard, Memory becomes increasingly valuable as resource and
-scheduling pressure grows, and Runtime Replanning is critical under dynamic
-perturbations. Fine-tuning Qwen3-8B with validated planning demonstrations
-retains 98.24\% of the Gemini~3.1~Pro planner's average score on simple and
-normal episodes, while reducing mean planning time by approximately 63\% and
-planning-token usage by 73\%. These results support lower-cost local deployment
-of the initial planning module.
+Across four downstream foundation-model configurations, the complete framework
+maintains high basic task completion, while execution quality and mission
+continuity decline as operational pressure increases. Controlled ablations
+show that Validation provides an occasional reliability safeguard, Memory
+becomes increasingly valuable as resource and scheduling pressure grows, and
+Runtime Replanning is critical under dynamic perturbations. Fine-tuning
+Qwen3-8B with validated planning demonstrations retains 98.24\% of the
+Gemini~3.1~Pro planner's average score on simple and normal episodes, while
+reducing mean planning time by approximately 63\% and planning-token usage by
+73\%. These results support lower-cost local deployment of the initial planning
+module.
 
 The current evidence remains limited to a calibrated simulation, a fixed
 episode set, and one real-platform configuration. Moreover, the specialized
 planner has not yet been evaluated under hard and expert runtime conditions.
-Future work will extend the evaluation to real-flight and mixed real--sim
-trials, more diverse platforms and fire dynamics, and larger fleets, while
-developing more selective memory retrieval and more robust, efficient
-replanning for high-pressure missions.
+The evaluation also does not include a direct numerical comparison with an
+external end-to-end rescue method because existing systems assume different
+inputs, action spaces, resource constraints, and evaluation protocols. The
+reported evidence therefore supports the framework within the task and
+evaluation setting defined here, rather than establishing general superiority
+over traditional planning methods. Future work will extend the evaluation to
+real-flight and mixed real--sim trials, more diverse platforms and fire
+dynamics, and larger fleets, while developing more selective memory retrieval
+and more robust, efficient replanning for high-pressure missions.
 
 \endinput

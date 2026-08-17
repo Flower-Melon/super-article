@@ -5,11 +5,12 @@
 
 We evaluate the proposed system using the evaluation suite described in
 Section~4. The experiments comprise three complementary settings. The first
-assesses the end-to-end system with different general-purpose foundation
-models under controlled mission conditions of varying difficulty. The second
-examines the contribution of the main system components through ablation. The
-third investigates whether a compact model specialized with domain decision
-traces can replace the general-purpose model in Mission Planning.
+establishes the end-to-end behavior of the complete system with different
+general-purpose foundation models under controlled mission conditions of
+varying difficulty. The second examines the contribution of the main system
+components through ablation. The third investigates whether a compact model
+specialized with domain decision traces can replace the general-purpose model
+in Mission Planning.
 
 To isolate the influence of the foundation model on plan generation,
 validation, and runtime adaptation, we fix Gemini~3.1~Pro as the foundation
@@ -19,8 +20,11 @@ DeepSeek~V4~Pro, respectively, in the remaining LLM-based modules. This design
 keeps the transformation from aerial imagery to the structured fire situation
 consistent across configurations, allowing their subsequent differences to
 reflect the models used in Mission Planning, Semantic Validation, and Runtime
-Replanning. Each configuration is evaluated on the same 80 episodes, comprising
-20 episodes at each of the simple, normal, hard, and expert difficulty levels.
+Replanning. The four configurations are controlled variants of the proposed
+system rather than external algorithmic baselines; because Vision Analysis is
+fixed, the comparison concerns the downstream decision modules. Each
+configuration is evaluated on the same 80 episodes, comprising 20 episodes at
+each of the simple, normal, hard, and expert difficulty levels.
 
 For the second setting, we use the DeepSeek~V4~Pro configuration and compare the
 full system with three ablated variants: w/o Validation, w/o Memory, and w/o
@@ -62,20 +66,20 @@ this experiment does not invoke Runtime Replanning or assess event stability.
 The comparison therefore isolates the effect of planner fine-tuning on the
 same episode subset.
 
-\subsection{Foundation Model Comparison}
+\subsection{End-to-End Evaluation}
 
-Table~\ref{tab:main-results} summarizes the end-to-end results for all four
-foundation-model configurations and difficulty levels, while
-Figure~\ref{fig:model-total-score} provides a direct comparison of their
-overall scores. The leading configuration depends on episode difficulty:
-Gemini~3.1~Pro and Claude~Opus~4.7 obtain the strongest scores in the simple
-and normal settings, whereas ChatGPT~5.5 leads in the hard and expert settings
-with scores of 65.09 and 40.15, respectively. Averaged over the four
-difficulty levels, Claude~Opus~4.7 obtains the highest overall score of 71.67,
-followed by Gemini~3.1~Pro (70.64), ChatGPT~5.5 (70.53), and DeepSeek~V4~Pro
-(68.68). The changing ordering indicates that model performance depends on the
-type and intensity of episode pressure rather than following one fixed
-ranking across all difficulty levels.
+Before examining individual components, we first evaluate the complete system
+across multiple foundation-model configurations. This experiment establishes
+end-to-end task performance under the proposed evaluation setting and examines
+the sensitivity of the downstream decision process to model choice.
+Table~\ref{tab:main-results} reports the results across all four difficulty
+levels, while Figure~\ref{fig:model-total-score} summarizes the overall scores.
+All configurations achieve complete objective coverage in the simple and
+normal episodes, near-complete coverage in the hard episodes, and completion
+scores above 90 in the expert episodes. Thus, each evaluated configuration can
+support the full decision chain from the shared visual analysis to mission
+execution, although the quality and continuity of execution vary with task
+difficulty.
 
 \begin{figure}[!htbp]
     \centering
@@ -87,25 +91,26 @@ ranking across all difficulty levels.
 
 \input{tables/foundation-model-results}
 
-All configurations complete nearly all objectives in the simple, normal, and
-hard settings, indicating that the proposed pipeline reliably converts the
-shared visual analysis into executable missions. The performance gap instead
-arises primarily from execution quality. The advantage shifts toward
-ChatGPT~5.5 in the hard and expert settings, where response, resource-pressure,
-coordination, and event-stability scores become more important. In the simple
-and normal settings, Gemini~3.1~Pro and Claude~Opus~4.7 remain stronger on
-several execution metrics. This pattern suggests that model differences emerge
-primarily in how the configurations handle increasing temporal, resource, and
-runtime pressure rather than in basic task completion.
+The overall scores are closely grouped in the simple setting
+(90.54--93.23) and the normal setting (86.28--89.18). The spread increases in
+the hard setting (59.03--65.09) and narrows again once every configuration
+encounters the severe expert-level conditions (37.55--40.15). The highest
+observed score is obtained by Gemini~3.1~Pro in simple episodes,
+Claude~Opus~4.7 in normal episodes, and ChatGPT~5.5 in hard and expert episodes.
+Because this ordering changes with difficulty, the results do not yield a
+single model ranking. Instead, the differences arise primarily in execution
+quality: response, mission time, resource pressure, coordination, and recovery
+from runtime events become more discriminative as operational pressure grows.
 
 Figure~\ref{fig:model-performance-radar} further compares the six
 mission-level metrics. In the simple and normal settings, the model profiles
 largely overlap near the outer region of the plots, although differences in
-time efficiency and coordination are already visible. The profiles separate
-more clearly in the hard and expert settings, where ChatGPT~5.5 retains the
-largest and most balanced coverage. Claude~Opus~4.7 is the strongest alternative
-in the simple and normal settings, whereas DeepSeek~V4~Pro shows the largest
-losses in coordination and time efficiency as episode pressure increases.
+time efficiency and coordination are already visible. As operational pressure
+increases, the profiles contract and differences become clearer in mission
+time, coordination, resource pressure, and event stability. The resulting
+variation shows that model choice affects how the downstream modules manage
+high-pressure execution, even though basic objective completion remains
+similar across configurations.
 
 \begin{figure}[!htbp]
     \centering
@@ -123,8 +128,9 @@ fall to 0--2.67. By contrast, expert-level completion remains above 90 for all
 models. Thus, the principal challenge in the hardest episodes is not whether
 the system can eventually address the rescue objectives, but whether it can do
 so efficiently while preserving mission continuity under repeated runtime
-perturbations. These results also expose clear headroom for more robust
-replanning and time-aware resource allocation.
+perturbations. Changing the foundation model alone does not prevent this common
+degradation, exposing clear headroom for more robust replanning and time-aware
+resource allocation.
 
 \FloatBarrier
 
@@ -133,7 +139,7 @@ replanning and time-aware resource allocation.
 Table~\ref{tab:ablation-results} reports the ablation results with
 DeepSeek~V4~Pro fixed as the foundation model. Removing Validation causes a
 modest but consistent reduction across all four difficulty levels, with drops
-of 2.15, 2.33, 3.80, and 2.06 points from simple to expert. The limited change
+of 2.16, 2.33, 3.81, and 2.05 points from simple to expert. The limited change
 in average mission score does not imply that the module remains inactive: the
 validation loop is triggered 5, 5, 4, and 6 times in the simple, normal, hard,
 and expert settings, respectively. These interventions suggest that Validation
