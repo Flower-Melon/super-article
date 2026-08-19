@@ -85,9 +85,9 @@ support the full decision loop from the shared Vision Analysis output to
 mission execution, although the quality and continuity of execution vary with
 operational pressure.
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
     \centering
-    \includegraphics[width=\textwidth]{figures/foundation-model-overall-scores.png}
+    \includegraphics[width=\columnwidth]{figures/foundation-model-overall-scores.png}
     \caption{Overall scores of the four foundation-model configurations across
     episode difficulty levels.}
     \label{fig:model-total-score}
@@ -119,7 +119,7 @@ remains similar across configurations.
 
 \begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/foundation-model-performance-radar.png}
+    \includegraphics[width=0.95\columnwidth]{figures/foundation-model-performance-radar.png}
     \caption{Mission-level performance profiles of the four foundation-model
     configurations at each difficulty level. Larger radial values indicate
     better performance.}
@@ -142,8 +142,6 @@ downstream models, rather than depending on a single downstream foundation
 model. At the same time, the common decline in execution quality and mission
 continuity establishes the operational-pressure regime in which the roles of
 the closed-loop mechanisms must be examined.
-
-\FloatBarrier
 
 \subsection{Ablation Studies}
 
@@ -170,9 +168,9 @@ improvement.
 Figure~\ref{fig:ablation-score-delta} visualizes the score change of each
 ablated system relative to the full configuration.
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
     \centering
-    \includegraphics[width=\textwidth]{figures/ablation-score-change-heatmap.png}
+    \includegraphics[width=\columnwidth]{figures/ablation-score-change-heatmap.png}
     \caption{Change in overall score relative to the full system for each
     ablated variant and difficulty level. Negative values indicate performance
     degradation, while positive values indicate improvement.}
@@ -205,9 +203,28 @@ their different average score contributions.
 
 \subsection{Fine-Tuned Planner Evaluation}
 
-The final experiment concerns deployment of Mission Planning.It asks whether
+The final experiment concerns deployment of Mission Planning. It asks whether
 validated demonstrations can specialize a compact planner for the simple and
 normal conditions in which Runtime Replanning is not invoked.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/planner-performance-radar.png}
+    \caption{Mission-level profiles of the three planners in the simple and
+    normal settings. Larger radial values indicate better performance. Event
+    stability is not interpreted because neither setting contains runtime
+    perturbations.}
+    \label{fig:planner-performance-radar}
+\end{figure}
+
+\begin{figure*}[!b]
+    \centering
+    \includegraphics[width=\textwidth]{figures/planner-score-efficiency-comparison.png}
+    \caption{Score--efficiency comparison of the three planners: (a) total
+    score, (b) planning duration, and (c) planning-token usage. Lower values are
+    better in (b) and (c).}
+    \label{fig:planner-score-efficiency}
+\end{figure*}
 
 Table~\ref{tab:fine-tuned-planner-results} compares the Gemini~3.1~Pro
 teacher planner with the original and fine-tuned Qwen3-8B planners. Fine-tuning
@@ -229,18 +246,6 @@ mission time and coordination. This indicates that the validated demonstrations
 transfer not only output-format compliance but also task-allocation and
 resource-management behavior to the compact planner.
 
-\begin{figure}[!t]
-    \centering
-    \includegraphics[width=0.96\textwidth]{figures/planner-performance-radar.png}
-    \caption{Mission-level profiles of the three planners in the simple and
-    normal settings. Larger radial values indicate better performance. Event
-    stability is not interpreted because neither setting contains runtime
-    perturbations.}
-    \label{fig:planner-performance-radar}
-\end{figure}
-
-\FloatBarrier
-
 The fine-tuned planner also reduces planning overhead under the evaluated
 deployment setting. Its mean planning time across the two levels is 14.01~s,
 compared with 37.50~s for Gemini~3.1~Pro, while its mean planning-token usage
@@ -256,15 +261,6 @@ deployable alternative for resource-constrained mission planning. This evidence
 is limited to initial planning on the evaluated simple and normal episodes; it
 does not establish how the compact planner would perform with Runtime
 Replanning under hard or expert conditions.
-
-\begin{figure}[!t]
-    \centering
-    \includegraphics[width=\textwidth]{figures/planner-score-efficiency-comparison.png}
-    \caption{Score--efficiency comparison of the three planners: (a) total
-    score, (b) planning duration, and (c) planning-token usage. Lower values are
-    better in (b) and (c).}
-    \label{fig:planner-score-efficiency}
-\end{figure}
 
 \FloatBarrier
 

@@ -1,4 +1,4 @@
-\begin{table}[!htbp]
+\begin{table*}[!t]
     \centering
     \caption{Comparison of the Gemini~3.1~Pro teacher planner, the original
     Qwen3-8B planner, and the fine-tuned Qwen3-8B planner. Mission-level scores
@@ -6,11 +6,10 @@
     token usage, lower is better. The best value at each difficulty level is
     shown in bold when it is unique.}
     \label{tab:fine-tuned-planner-results}
-    \scriptsize
-    \setlength{\tabcolsep}{3.2pt}
+    \footnotesize
+    \setlength{\tabcolsep}{1.2pt}
     \renewcommand{\arraystretch}{1.12}
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{@{}llcrrrrrrr@{}}
+    \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llcrrrrrrr@{}}
         \toprule
         \multirow{2}{*}{\textbf{Difficulty}}
         & \multirow{2}{*}{\textbf{Planner}}
@@ -47,6 +46,5 @@
         & 87.39 & 98.75 & 90.57 & \textbf{75.83}
         & 85.45 & \textbf{73.43} & \textbf{15.07} & \textbf{3,701} \\
         \bottomrule
-    \end{tabular}%
-    }
-\end{table}
+    \end{tabular*}
+\end{table*}

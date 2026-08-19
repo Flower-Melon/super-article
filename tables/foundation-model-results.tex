@@ -1,4 +1,4 @@
-\begin{table}[!htbp]
+\begin{table*}[!t]
     \centering
     \caption{End-to-end results across foundation-model configurations and
     episode difficulty levels.
@@ -9,11 +9,10 @@
     unique; these highlights describe the evaluated configurations rather than
     a general ranking of foundation models.}
     \label{tab:main-results}
-    \scriptsize
-    \setlength{\tabcolsep}{3.2pt}
+    \footnotesize
+    \setlength{\tabcolsep}{1.5pt}
     \renewcommand{\arraystretch}{1.12}
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{@{}llcrrrrrr@{}}
+    \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llcrrrrrr@{}}
         \toprule
         \multirow{2}{*}{\textbf{Difficulty}}
         & \multirow{2}{*}{\textbf{Foundation model}}
@@ -72,6 +71,5 @@
         & DeepSeek~V4~Pro
         & 37.55 & 90.95 & 61.09 & 3.54 & 0.00 & 53.43 & 54.43 \\
         \bottomrule
-    \end{tabular}%
-    }
-\end{table}
+    \end{tabular*}
+\end{table*}

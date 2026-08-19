@@ -1,9 +1,9 @@
 % !TEX root = ../main.tex
 \section{Introduction}
 
-Wildfires threaten ecosystems, infrastructure, and human safety
-\citep{bowman2020wildfire}. UAVs can rapidly observe hazardous and inaccessible
-areas through flexible aerial sensing \citep{allan2022remote}, but operational
+\IEEEPARstart{W}{ildfires} threaten ecosystems, infrastructure, and human safety
+\cite{bowman2020wildfire}. UAVs can rapidly observe hazardous and inaccessible
+areas through flexible aerial sensing \cite{allan2022remote}, but operational
 response requires more than aerial detection. Observations must be converted
 into task zones, assigned across a resource-limited fleet, and revised as the
 fire or UAV state changes. Multi-UAV wildfire rescue is therefore a closed-loop
@@ -12,7 +12,7 @@ decision problem rather than an isolated perception or path-planning task.
 The difficulty lies in satisfying two requirements at the same time. First, an
 initial mission must be feasible for the current fleet. Task priorities must be
 matched to vehicle locations, endurance, payload, communication, and safety
-limits \citep{floreano2015science}; otherwise, a semantically plausible plan may
+limits \cite{floreano2015science}; otherwise, a semantically plausible plan may
 still be impossible to execute. Second, feasibility is temporary. Fire
 evolution, resource consumption, communication changes, and UAV faults can
 invalidate assignments that were valid when they were generated. A useful
@@ -23,7 +23,7 @@ replanning are coupled parts of the same decision problem.
 
 Existing work has advanced fire detection, aerial scene understanding, damage
 assessment, navigation, and multi-UAV coordination
-\citep{erdelj2017help}. These capabilities provide essential parts of a rescue
+\cite{erdelj2017help}. These capabilities provide essential parts of a rescue
 system, but they are commonly developed and evaluated as separate stages. As a
 result, strong perception does not by itself establish that detected fire
 conditions can be converted into a feasible fleet mission, while a feasible
@@ -35,7 +35,7 @@ replanning within one continuous loop.
 
 Large language models (LLMs) and multimodal LLMs offer a flexible interface for
 this layer because they can connect visual interpretation, task decomposition,
-and high-level planning \citep{driess2023palme}. However, free-form generation
+and high-level planning \cite{driess2023palme}. However, free-form generation
 alone is insufficient for a resource-constrained, safety-relevant mission. An
 LLM may produce a coherent plan that violates fleet constraints, overlook a
 relevant lesson from a previous case, or continue to rely on an obsolete plan

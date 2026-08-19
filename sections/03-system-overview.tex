@@ -53,12 +53,12 @@ needed to design and evaluate a closed-loop system.
 
 \subsection{System Overview}
 
-\begin{figure}[htbp]
+\begin{figure*}[!t]
     \centering
     \includegraphics[width=1\textwidth]{figures/system-overview.png}
     \caption{Overview of the proposed system.}
     \label{fig:method-overview}
-\end{figure}
+\end{figure*}
 
 Based on the task model above, the proposed LLM-centered closed-loop decision
 framework is organized around the flow of mission state, candidate plans,
@@ -182,13 +182,14 @@ and the execution outcome of case $i$, respectively. For either episodic
 memory or lesson memory, the system retrieves the $K$ most semantically similar
 entries to the current query according to
 \begin{equation}
-\mathcal{R}_K(q,M)=
-\underset{m_i\in M}{\operatorname{TopK}}\;
-\operatorname{sim}(q,m_i),
-\qquad
-\operatorname{sim}(q,m_i)=
-\frac{\phi(q)^\top\phi(m_i)}
-{\lVert\phi(q)\rVert_2\lVert\phi(m_i)\rVert_2},
+\begin{aligned}
+\mathcal{R}_K(q,M)
+&=\underset{m_i\in M}{\operatorname{TopK}}\;
+  \operatorname{sim}(q,m_i),\\
+\operatorname{sim}(q,m_i)
+&=\frac{\phi(q)^\top\phi(m_i)}
+{\lVert\phi(q)\rVert_2\lVert\phi(m_i)\rVert_2}.
+\end{aligned}
 \label{eq:semantic-memory-retrieval}
 \end{equation}
 where $M\in\{M_E,M_L\}$ is the queried memory, $\phi(\cdot)$ maps a query

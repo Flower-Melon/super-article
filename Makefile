@@ -1,13 +1,13 @@
 # ============================================================
 #  LaTeX 编译 Makefile
 #  用法:
-#    make         - 快速编译 (仅 xelatex 一次)
-#    make pdf     - 完整编译 (xelatex + bibtex + xelatex*2)
+#    make         - 快速编译 (仅 pdflatex 一次)
+#    make pdf     - 完整编译 (pdflatex + bibtex + pdflatex*2)
 #    make clean   - 删除辅助文件
 # ============================================================
 
 MAIN   = main
-TEX    = xelatex
+TEX    = pdflatex
 BIB    = bibtex
 
 .PHONY: all pdf clean

@@ -1,95 +1,56 @@
-% !TEX program = xelatex
-% ============================================================
-%  Journal Paper
-% ============================================================
-\documentclass[a4paper,12pt]{article}
+% !TEX program = pdflatex
+% IEEE Transactions on Industrial Informatics manuscript
+\IfFileExists{ieeecolor.cls}{%
+    \documentclass[journal,twoside,web]{ieeecolor}
+    \IfFileExists{generic.sty}{\usepackage{generic}}{}
+}{%
+    % The TII template bundle is not installed in every TeX distribution.
+    % IEEEtran preserves the IEEE journal layout until that bundle is present.
+    \documentclass[journal,twoside]{IEEEtran}
+}
 
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage[caption=false,font=footnotesize]{subfig}
+\usepackage{enumitem}
+\usepackage{placeins}
+\usepackage{stfloats}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
 
-% ------------------ Essential packages ------------------
-\usepackage{amsmath,amssymb,amsfonts}    % Math
-\usepackage{graphicx}                    % Figures
-\usepackage{booktabs}                    % Professional tables
-\usepackage{geometry}                    % Page margins
-\geometry{a4paper, margin=2.5cm}
-\usepackage{indentfirst}                 % Indent first paragraph after section headings
-\usepackage{microtype}                   % Micro-typography for better line breaking
-\usepackage{bookmark}                    % PDF bookmarks
-\usepackage{hyperref}                    % Hyperlinks
-\hypersetup{hidelinks}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
-% ------------------ Citations ------------------
-\usepackage[authoryear,round]{natbib}
-
-% ------------------ Other useful packages ------------------
-\usepackage{caption}                     % Figure/table captions
-\usepackage{subcaption}                  % Sub-figures
-\usepackage{enumitem}                    % Custom lists
-\usepackage{xcolor}                      % Colors
-\usepackage{cleveref}                    % Smart references (\cref)
-\usepackage{tabularx}                    % Flexible table widths
-\usepackage{array}                       % Table column definitions
-\usepackage{makecell}                    % Multi-line table cells
-\usepackage{multirow}                    % Multi-row table cells
-\usepackage{pifont}                      % Symbols and dingbats
-\usepackage{placeins}                    % Keep floats within their logical sections
-
-% ------------------ Publication layout ------------------
-\captionsetup{font=small,labelfont=bf,skip=6pt}
-\setlength{\textfloatsep}{14pt plus 3pt minus 3pt}
-\setlength{\floatsep}{10pt plus 2pt minus 2pt}
-\renewcommand{\topfraction}{0.88}
-\renewcommand{\bottomfraction}{0.72}
-\renewcommand{\textfraction}{0.10}
-\renewcommand{\floatpagefraction}{0.85}
-\makeatletter
-\setlength{\@fptop}{0pt}
-\setlength{\@fpsep}{12pt}
-\setlength{\@fpbot}{0pt plus 1fil}
-\makeatother
-
-% ------------------ Document info ------------------
-\title{Closed-Loop LLM Agents for Multi-UAV Wildfire Rescue}
-\author{Author One \\
-        Department, Institution, City, Postal Code, Country \\
-        \and
-        Author Two \\
-        Department, Institution, City, Postal Code, Country}
-\date{\today}
+\markboth{IEEE Transactions on Industrial Informatics, Vol. XX, No. XX, 2026}
+{Author One \MakeLowercase{\textit{et al.}}: Closed-Loop LLM Agents for Multi-UAV Wildfire Rescue}
 
 \begin{document}
+
+\title{Closed-Loop LLM Agents for Multi-UAV Wildfire Rescue}
+
+\author{Author One and Author Two%
+\thanks{Manuscript received Month XX, 2026; revised Month XX, 2026.}%
+\thanks{Author One and Author Two are with the Department, Institution, City,
+Postal Code, Country (e-mail: author@example.com).}}
 
 \maketitle
 
 \begin{abstract}
-Multi-UAV wildfire rescue requires uncertain aerial observations to be
-translated into fleet missions that satisfy resource and safety constraints and
-remain effective as operational conditions change. We investigate whether
-large language models (LLMs) can serve as the high-level closed-loop decision
-core of such a system.
-
-We formulate wildfire rescue as a closed-loop decision problem. The resulting
-LLM-centered closed-loop decision framework integrates fire-situation
-understanding and resource-constrained mission planning with Validation,
-Memory, and Runtime Replanning. It is evaluated in a real-UAV-informed AirSim
-suite spanning four difficulty levels.
-
-Across four downstream foundation-model configurations, the framework maintains
-high basic task completion, although execution quality declines as operational
-pressure increases. Controlled ablations show that Validation, Memory, and
-Runtime Replanning provide complementary benefits at different levels of
-operational pressure. On simple and normal episodes, a fine-tuned Qwen3-8B
-planner retains 98.24\% of the Gemini~3.1~Pro teacher planner's average
-score while substantially reducing planning overhead. These results
-characterize the potential and limitations of LLMs for high-level closed-loop
-decision making in adaptive multi-UAV wildfire rescue. The implementation is available at
-\url{https://github.com/tongsuhdyem/Pipeline}.
-
-\noindent\textbf{Keywords:} multi-UAV wildfire rescue; LLM agents; compact planner fine-tuning; high-level closed-loop decision making; real-to-sim evaluation
+Multi-UAV wildfire rescue requires uncertain aerial observations to be translated into fleet missions that satisfy resource and safety constraints and remain effective as operational conditions change. We investigate whether large language models (LLMs) can serve as the high-level closed-loop decision core of such a system. We formulate wildfire rescue as a closed-loop decision problem. The resulting LLM-centered closed-loop decision framework integrates fire-situation understanding and resource-constrained mission planning with Validation, Memory, and Runtime Replanning. It is evaluated in a real-UAV-informed AirSim suite spanning four difficulty levels. Across four downstream foundation-model configurations, the framework maintains high basic task completion, although execution quality declines as operational pressure increases. Controlled ablations show that Validation, Memory, and Runtime Replanning provide complementary benefits at different levels of operational pressure. On simple and normal episodes, a fine-tuned Qwen3-8B planner retains 98.24\% of the Gemini~3.1~Pro teacher planner's average score while substantially reducing planning overhead. These results characterize the potential and limitations of LLMs for high-level closed-loop decision making in adaptive multi-UAV wildfire rescue. The implementation is available at \url{https://github.com/tongsuhdyem/Pipeline}.
 \end{abstract}
 
-% ============================================================
-%  Main body (split into separate files via \input)
-% ============================================================
+\begin{IEEEkeywords}
+Closed-loop decision making, large language model agents, multi-UAV systems,
+real-to-simulation evaluation, wildfire rescue.
+\end{IEEEkeywords}
 
 \input{sections/01-introduction}
 \input{sections/02-related-work}
@@ -98,17 +59,7 @@ decision making in adaptive multi-UAV wildfire rescue. The implementation is ava
 \input{sections/05-experiments}
 \input{sections/06-conclusion}
 
-% ============================================================
-%  Bibliography
-% ============================================================
-
-\bibliographystyle{plainnat}
+\bibliographystyle{IEEEtran}
 \bibliography{references}
-
-% ============================================================
-%  Appendix (optional)
-% ============================================================
-% \appendix
-% \input{sections/appendix}
 
 \end{document}

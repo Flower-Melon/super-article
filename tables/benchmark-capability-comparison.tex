@@ -8,14 +8,16 @@
 \newcommand{\pmark}{\ensuremath{\circ}}
 \newcommand{\xmark}{\textemdash}
 
-\begin{table}[!htbp]
+\begin{table*}[!t]
 \centering
 \caption{Coverage of evaluation capabilities in existing datasets, benchmarks,
 and the evaluation suite used in this work.
 \cmark indicates explicit coverage, \pmark indicates partial coverage, and \xmark indicates no explicit coverage.}
 \label{tab:benchmark_comparison}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{lcccc}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc@{}}
 \toprule
 \textbf{Benchmark / Dataset}
 & \textbf{\makecell{Forest Fire\\Perception}}
@@ -24,28 +26,28 @@ and the evaluation suite used in this work.
 & \textbf{\makecell{Runtime\\Replanning}} \\
 \midrule
 
-DOTA~\citep{xia2018dota}
+DOTA~\cite{xia2018dota}
 & \cmark & \xmark & \xmark & \xmark \\
 
-VisDrone~\citep{zhu2022visdrone}
+VisDrone~\cite{zhu2022visdrone}
 & \cmark & \xmark & \xmark & \xmark \\
 
-UAVs-FFDB~\citep{mowla2024uavsffdb}
+UAVs-FFDB~\cite{mowla2024uavsffdb}
 & \cmark & \cmark & \xmark & \xmark \\
 
-FLAME~\citep{shamsoshoara2021flame}
+FLAME~\cite{shamsoshoara2021flame}
 & \cmark & \cmark & \xmark & \xmark \\
 
-MS-FSDB~\citep{han2024msfsdb}
+MS-FSDB~\cite{han2024msfsdb}
 & \pmark & \cmark & \xmark & \xmark \\
 
-WildFireVQA~\citep{habibpour2026wildfirevqa}
+WildFireVQA~\cite{habibpour2026wildfirevqa}
 & \cmark & \cmark & \pmark & \xmark \\
 
-RMASBench~\citep{kleiner2013rmasbench}
+RMASBench~\cite{kleiner2013rmasbench}
 & \xmark & \cmark & \pmark & \pmark \\
 
-CrisisBench~\citep{alam2021crisisbench}
+CrisisBench~\cite{alam2021crisisbench}
 & \xmark & \cmark & \xmark & \xmark \\
 
 \midrule
@@ -53,6 +55,5 @@ CrisisBench~\citep{alam2021crisisbench}
 & \cmark & \cmark & \cmark & \cmark \\
 
 \bottomrule
-\end{tabular}
-}
-\end{table}
+\end{tabular*}
+\end{table*}
