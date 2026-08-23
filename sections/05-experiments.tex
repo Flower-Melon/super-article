@@ -5,13 +5,13 @@
 
 We evaluate the proposed system using the evaluation suite described in
 Section~4. The three experimental settings examine three questions in sequence.
-The first evaluates whether the complete framework can execute the end-to-end
-decision loop across different downstream foundation-model configurations as
-operational pressure increases. The second examines how Validation, Memory, and
-Runtime Replanning address their respective decision risks under increasing
-operational pressure. The third assesses whether validated decision traces can
-specialize a lower-overhead compact planner for resource-constrained mission
-planning. 
+The first compares the end-to-end behavior of the complete framework with an
+Optimization-Based Planner as operational pressure increases and examines the
+sensitivity of the downstream decision process to model choice. The second
+examines how Validation, Memory, and Runtime Replanning address their respective
+decision risks under increasing operational pressure. The third assesses
+whether validated decision traces can specialize a lower-overhead compact
+planner for resource-constrained mission planning.
 
 To isolate the influence of the foundation model on Mission Planning,
 Validation, and Runtime Replanning, we fix Gemini~3.1~Pro as the foundation
@@ -21,11 +21,19 @@ DeepSeek~V4~Pro, respectively, in the remaining LLM-based modules. This design
 keeps the transformation from aerial imagery to the structured fire situation
 consistent across configurations, allowing their subsequent differences to
 reflect the models used in Mission Planning, Semantic Validation, and Runtime
-Replanning. The four configurations are controlled variants of the proposed
-system rather than external algorithmic baselines; because Vision Analysis is
-fixed, the comparison concerns the downstream decision modules. Each
-configuration is evaluated on the same 80 episodes, comprising 20 episodes at
-each of the simple, normal, hard, and expert difficulty levels.
+Replanning. These four downstream foundation-model configurations are used to
+assess the sensitivity of the downstream decision process to model choice.
+
+We additionally evaluate an Optimization-Based Planner implemented with the
+CP-SAT solver in Google OR-Tools. It uses the shared Vision Analysis output and
+performs initial resource-constrained mission planning under the same UAV
+states, mission constraints, and action space as the proposed framework. After
+each runtime perturbation, it uses the updated operational state to re-optimize
+the remaining task chains. Its downstream decision process does not use an LLM,
+Validation, or Memory. The baseline and all four foundation-model
+configurations are evaluated on the same 80 episodes, comprising 20 episodes at
+each of the simple, normal, hard, and expert difficulty levels, under the same
+execution and scoring procedure.
 
 For the second setting, we use the DeepSeek~V4~Pro configuration and compare the
 full system with three ablated variants: w/o Validation, w/o Memory, and w/o
@@ -69,79 +77,78 @@ same episode subset.
 
 \subsection{End-to-End Evaluation}
 
-Before examining individual mechanisms, we first evaluate the complete system
-across multiple foundation-model configurations. This experiment establishes
-end-to-end task performance under the proposed evaluation setting and examines
-the sensitivity of the downstream decision process to model choice.
-Its primary purpose is to determine whether the full decision loop can be
-executed across the evaluated configurations, rather than to produce a
-general ranking of foundation models.
-Table~\ref{tab:main-results} reports the results across all four difficulty
-levels, while Figure~\ref{fig:model-total-score} summarizes the overall scores.
-All configurations achieve complete task coverage in the simple and
-normal episodes, near-complete coverage in the hard episodes, and completion
-scores above 90 in the expert episodes. Thus, each evaluated configuration can
-support the full decision loop from the shared Vision Analysis output to
-mission execution, although the quality and continuity of execution vary with
-operational pressure.
+Before examining individual mechanisms, we compare the complete framework with
+the Optimization-Based Planner and evaluate it across four downstream
+foundation-model configurations. This experiment examines whether the complete
+framework provides benefits over conventional optimization as operational
+pressure increases, while also assessing the sensitivity of the downstream
+decision process to model choice. Table~\ref{tab:main-results} reports the
+mission-level results across all four difficulty levels,
+Figure~\ref{fig:model-total-score} summarizes the overall scores, and
+Figure~\ref{fig:model-performance-radar} compares the corresponding performance
+profiles.
 
 \begin{figure}[!t]
     \centering
     \includegraphics[width=\columnwidth]{figures/foundation-model-overall-scores.png}
-    \caption{Overall scores of the four foundation-model configurations across
-    episode difficulty levels.}
+    \caption{Overall scores of the Optimization-Based Planner and four
+    foundation-model configurations across episode difficulty levels.}
     \label{fig:model-total-score}
 \end{figure}
 
 \input{tables/foundation-model-results}
 
-The overall scores are closely grouped in the simple setting
-(90.54--93.23) and the normal setting (86.28--89.18). The spread increases in
-the hard setting (59.03--65.09) and narrows again once every configuration
-encounters the severe expert-level conditions (37.55--40.15). The highest
-observed score is obtained by Gemini~3.1~Pro in simple episodes,
-Claude~Opus~4.7 in normal episodes, and ChatGPT~5.5 in hard and expert episodes.
-Because this ordering changes with difficulty, the results do not yield a
-single model ranking. Instead, the differences arise primarily in execution
-quality: response, mission time, resource pressure, coordination, and recovery
-from runtime events become more discriminative as operational pressure
-increases.
+In the simple and normal settings, where no runtime perturbations occur, all
+evaluated methods achieve complete task coverage. The Optimization-Based
+Planner obtains overall scores of 92.59 and 88.72, respectively, which lie
+within the corresponding ranges of the four foundation-model configurations
+(90.54--93.23 and 86.28--89.18). It also obtains the highest response and
+resource-pressure scores in the simple setting and the highest mission-time and
+resource-pressure scores in the normal setting. These results show that the
+conventional planner remains competitive under lower operational pressure when
+execution feedback does not invalidate the initial mission state.
 
-Figure~\ref{fig:model-performance-radar} further compares the six
-mission-level metrics. In the simple and normal settings, the model profiles
-largely overlap near the outer region of the plots, although differences in
-time efficiency and coordination are already visible. As operational pressure
-increases, the profiles contract and differences become clearer in mission
-time, coordination, resource pressure, and event stability. The resulting
-variation shows that model choice affects how the downstream modules manage
-execution under higher operational pressure, even though task completion
-remains similar across configurations.
+Once runtime perturbations are introduced, the difference between the two
+decision approaches becomes more pronounced. The Optimization-Based Planner's
+overall score falls to 49.77 in the hard setting and 21.53 in the expert
+setting, respectively 9.26 and 16.02 points below the lowest-scoring
+foundation-model configuration. In the hard episodes, all six of its
+mission-level scores fall below the corresponding ranges of the four
+foundation-model configurations. In the expert episodes, its completion score
+falls to 78.27, compared with 90.09--93.24 for the four configurations, while
+its response, mission-time, resource-pressure, and coordination scores are also
+lower. Its event-stability score of 0 lies within the 0--2.67 range of the four
+configurations. The higher overall performance of the complete framework is
+therefore not attributable to event stability alone, but is also reflected in
+task completion and the other execution-quality metrics.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.95\columnwidth]{figures/foundation-model-performance-radar.png}
-    \caption{Mission-level performance profiles of the four foundation-model
-    configurations at each difficulty level. Larger radial values indicate
-    better performance.}
+    \caption{Mission-level performance profiles of the Optimization-Based
+    Planner and four foundation-model configurations at each difficulty level.
+    Larger radial values indicate better performance.}
     \label{fig:model-performance-radar}
 \end{figure}
 
-Increasing operational pressure across the difficulty levels nevertheless
-degrades every configuration.
-The most pronounced changes occur in mission time and event stability: time
-scores fall to 3.54--13.23 in expert episodes, while event-stability scores
-fall to 0--2.67. By contrast, expert-level completion remains above 90 for all
-models. Thus, the principal challenge in the hardest episodes is not whether
-the system can eventually complete the rescue tasks, but whether it can do
-so efficiently while preserving mission continuity under repeated runtime
-perturbations. Changing the foundation model alone does not prevent this common
-degradation, exposing clear headroom for more robust replanning and time-aware
-resource allocation. Taken together, the results show that the complete
-decision loop maintains high basic task completion across the evaluated
-downstream models, rather than depending on a single downstream foundation
-model. At the same time, the common decline in execution quality and mission
-continuity establishes the operational-pressure regime in which the roles of
-the closed-loop mechanisms must be examined.
+Among the four foundation-model configurations, Gemini~3.1~Pro obtains the
+highest overall score in the simple setting, Claude~Opus~4.7 in the normal
+setting, and ChatGPT~5.5 in the hard and expert settings. Because this ordering
+changes with difficulty, the results do not yield a single model ranking. All
+four configurations maintain high basic task completion in the hard and expert
+episodes, but their mission-time scores fall to 3.54--13.23 and their
+event-stability scores to 0--2.67 under expert conditions. Model choice thus
+affects the downstream decision process, but changing the foundation model
+alone does not prevent the common degradation as operational pressure
+increases.
+
+Taken together, the Optimization-Based Planner remains competitive in the
+simple and normal episodes, where no runtime perturbations occur. Under the
+higher operational pressure of the hard and expert episodes, the complete
+framework maintains higher basic task completion and execution quality across
+all four downstream foundation-model configurations. The common decline in
+mission time and event stability under expert conditions nevertheless leaves
+clear headroom for more robust replanning and time-aware resource allocation.
 
 \subsection{Ablation Studies}
 

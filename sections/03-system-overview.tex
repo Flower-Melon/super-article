@@ -56,6 +56,12 @@ needed to design and evaluate a closed-loop system.
 \begin{figure*}[!t]
     \centering
     \includegraphics[width=1\textwidth]{figures/system-overview.png}
+    \makeatletter
+    \long\def\@makecaption#1#2{%
+        \@IEEEfigurecaptionsepspace
+        \hbox to\hsize{\normalfont\footnotesize\hfil
+            \hbox{\normalfont\footnotesize #1.\nobreakspace\nobreakspace #2}\hfil}}
+    \makeatother
     \caption{Overview of the proposed system.}
     \label{fig:method-overview}
 \end{figure*}

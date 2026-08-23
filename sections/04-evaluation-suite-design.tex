@@ -182,9 +182,15 @@ events in every family, while preserving coverage of all five families.
 \begin{figure*}[!t]
     \centering
     \subfloat[Runtime perturbation library.]{%
-        \includegraphics[width=0.485\textwidth]{figures/runtime-perturbation-library.png}}\hfill
+        \includegraphics[width=0.35\textwidth]{figures/runtime-perturbation-library.png}}\hspace{0.04\textwidth}
     \subfloat[Distribution of perturbations in hard and expert levels.]{%
-        \includegraphics[width=0.485\textwidth]{figures/runtime-perturbation-sampling-distribution.png}}
+        \includegraphics[width=0.35\textwidth]{figures/runtime-perturbation-sampling-distribution.png}}
+    \makeatletter
+    \long\def\@makecaption#1#2{%
+        \@IEEEfigurecaptionsepspace
+        \hbox to\hsize{\normalfont\footnotesize\hfil
+            \hbox{\normalfont\footnotesize #1.\nobreakspace\nobreakspace #2}\hfil}}
+    \makeatother
     \caption{Runtime perturbations used for closed-loop evaluation.}
     \label{fig:runtime-perturbation-distribution}
 \end{figure*}
