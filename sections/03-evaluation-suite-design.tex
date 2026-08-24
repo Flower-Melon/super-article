@@ -1,38 +1,20 @@
 \section{Evaluation Suite Design}
+\label{sec:evaluation-suite}
 
-The evaluation suite is designed to test whether high-level closed-loop
-decision making with the LLM-centered closed-loop decision framework remains
-effective as operational pressure increases. This requires more than evaluating
-perception, planning, or replanning separately. Existing datasets and
-evaluation settings only
-partially cover the closed-loop rescue decision chain defined in Section~3. As
-summarized in Table~\ref{tab:benchmark_comparison}, no existing setting jointly
-evaluates the transition from aerial observation to task-zone construction,
-resource-constrained mission planning, and runtime replanning. This comparison
-concerns evaluation coverage rather than algorithmic performance.
+This section presents a controlled, real-UAV-informed evaluation suite in
+AirSim for testing whether high-level closed-loop decision making with the
+LLM-centered closed-loop decision framework remains effective as operational
+pressure increases. It instantiates the task model in
+Section~\ref{sec:system-design} through real-to-sim calibration, difficulty
+stratification, and mission-level metrics, which ground the simulated setting,
+vary operational pressure, and separate task completion, execution quality, and
+mission continuity. As summarized in Table~\ref{tab:benchmark_comparison},
+existing settings cover only parts of the transition from aerial observation to
+task-zone construction, resource-constrained mission planning, and runtime
+replanning; the comparison concerns evaluation coverage rather than algorithmic
+performance. The following subsections detail the three design elements.
 
 \input{tables/benchmark-capability-comparison}
-
-To close this gap, we instantiate the task model of Section~3 as a controlled,
-real-UAV-informed evaluation suite in AirSim. The suite evaluates whether a
-system can complete the full rescue loop within a single episode, from
-fire-situation understanding to an executable plan and runtime replanning after
-perturbations. The suite separately exposes task completion, execution quality,
-and mission continuity, preventing high task completion from being interpreted
-as uniformly effective execution under pressure. Its design combines three
-complementary elements.
-
-First, real-to-sim calibration constrains simulated platforms, sensing, and
-mission conditions by the capabilities and safety limits of a real UAV. The
-resulting evaluation episodes are therefore physically and operationally grounded rather
-than arbitrarily configured. Second, difficulty stratification varies the
-complexity of fire-point layouts, fleet-resource conditions, scheduling
-interactions, and runtime perturbations while preserving a common task
-definition. It enables controlled comparison of models and system mechanisms as
-operational pressure increases. Third, mission-level metrics assess the
-outcome of the complete rescue process from complementary operational
-perspectives, rather than collapsing performance into a single score. The
-following sections detail these three elements.
 
 \begin{figure}[!t]
     \centering
@@ -45,6 +27,7 @@ following sections detail these three elements.
 \end{figure}
 
 \subsection{Real-to-Sim Calibration}
+\label{subsec:real-to-sim-calibration}
 The first design property is realized through a co-design between the real UAV
 platform and the AirSim simulation environment. As stated above, real UAV
 parameters constrain every evaluation episode. Accordingly, the real platform defines the
@@ -99,32 +82,17 @@ These calibrated bounds provide the common operational basis on which the
 difficulty levels are constructed.
 
 \subsection{Difficulty Stratification}
-The second design property is that each evaluation episode is purpose-built
-rather than randomly sampled.
-Each episode instantiates the task variables defined in Section~3 through three
-controlled dimensions: fleet and resource conditions, fire-point layouts, and,
-where applicable, runtime perturbations. Their combinations define four
-stress-testing difficulty levels in Table~\ref{tab:scenario-controls}. Each
-difficulty level is instantiated by a fixed set of 20 evaluation episodes,
-yielding 80 episodes in total.
-
-The four levels form a staged operational-pressure axis rather than four
-unrelated scenario groups. The simple and normal levels test fire-situation
-understanding and resource-constrained mission planning under progressively
-tighter initial conditions. The hard and expert levels retain these pressures
-while adding runtime perturbations and stronger scheduling interactions. This
-progression makes episode difficulty useful not only for measuring end-to-end
-degradation, but also for identifying when Validation, Memory, and Runtime
-Replanning become consequential.
+Each of the four difficulty levels in Table~\ref{tab:scenario-controls}
+contains 20 fixed evaluation episodes, yielding 80 episodes in total. The simple
+and normal levels test fire-situation understanding and resource-constrained
+mission planning without runtime perturbations, whereas the hard and expert
+levels introduce progressively stronger resource constraints and scheduling
+interactions together with runtime perturbations. All fleet, sensing, energy,
+payload, and communication settings
+remain within the real-to-sim calibrated bounds in
+Section~\ref{subsec:real-to-sim-calibration}.
 
 \input{tables/scenario-difficulty-controls}
-
-The fleet and resource conditions in every evaluation episode are constrained by the
-real-to-sim calibration in Section~4.1. In particular, each simulated UAV must
-satisfy the feasible operating envelope in Eq.~\ref{eq:uav-envelope}, and its
-imaging, energy, payload, and communication settings follow
-Table~\ref{tab:real_to_sim_calibration}. Difficulty is therefore varied only
-within the engineering and operational limits established for the real platform.
 
 The fire-point configurations of all episodes are pre-specified rather than
 randomly generated. These configurations control the scene structure
@@ -154,30 +122,13 @@ used to instantiate the four difficulty levels.
     \label{fig:fire-point-count-distribution}
 \end{figure}
 
-The third controlled dimension introduces runtime perturbations after mission
-execution has begun. Unlike the preceding two dimensions, which specify the
-initial fleet state and fire scene, these events modify the operational state
-or mission constraints faced by an active plan. For this evaluation suite, we
-construct our own runtime perturbation library comprising five families: fire evolution (30\%),
-UAV-state failure (24\%), zone evolution (19\%), scheduling constraint (14\%),
-and resource failure (13\%). As shown in
-Figure~\ref{fig:runtime-perturbation-distribution}(a), each family contains
-concrete event types, such as new fire sources and fire spreading, positioning,
-sensor, and communication failures, boundary changes and affected-area
-expansion, human commands and priority changes, and load exhaustion and energy
-shortage.
-
-Runtime perturbations are enabled only in the hard and expert levels and are
-placed at predefined points in each episode so that replanning behavior can be
-evaluated under repeatable conditions. During suite construction, events are
-drawn once from the library according to the configured sampling distribution
-and then fixed within the evaluation episodes.
-Hard episodes contain a small number of temporally separated perturbations,
-whereas expert episodes contain more frequent perturbations that may occur
-concurrently or in succession and impose stronger communication and global
-scheduling pressure. Figure~\ref{fig:runtime-perturbation-distribution}(b)
-shows the resulting draws by perturbation family: expert episodes contain more
-events in every family, while preserving coverage of all five families.
+Runtime perturbations modify the operational state or mission constraints after
+execution begins. Figure~\ref{fig:runtime-perturbation-distribution} summarizes
+the five event families and the fixed draws used in hard and expert episodes;
+events are sampled once during suite construction and placed at predefined
+episode points, with hard episodes using a few temporally separated
+perturbations and expert episodes using more frequent, potentially overlapping
+perturbations.
 
 \begin{figure*}[!t]
     \centering

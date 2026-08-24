@@ -1,77 +1,97 @@
 % !TEX root = ../main.tex
 \section{Introduction}
+\label{sec:introduction}
 
 \IEEEPARstart{W}{ildfires} threaten ecosystems, infrastructure, and human safety
 \cite{bowman2020wildfire}. UAVs can rapidly observe hazardous and inaccessible
 areas through flexible aerial sensing \cite{allan2022remote}, but operational
-response requires more than aerial detection. Observations must be converted
-into task zones, assigned across a resource-limited fleet, and revised as the
-fire or UAV state changes. Multi-UAV wildfire rescue is therefore a closed-loop
-decision problem rather than an isolated perception or path-planning task.
+response requires observations to be converted into task zones, assigned across
+a resource-limited fleet, and revised as the fire or UAV state changes.
+Multi-UAV wildfire rescue is therefore a closed-loop decision problem rather
+than an isolated perception or path-planning task.
 
-The difficulty lies in satisfying two requirements at the same time. First, an
-initial mission must be feasible for the current fleet. Task priorities must be
-matched to vehicle locations, endurance, payload, communication, and safety
-limits \cite{floreano2015science}; otherwise, a semantically plausible plan may
-still be impossible to execute. Second, feasibility is temporary. Fire
+An initial mission must be feasible for the current fleet: task priorities must
+be matched to vehicle locations, endurance, payload, communication, and safety
+limits \cite{floreano2015science}. Feasibility is also temporary because fire
 evolution, resource consumption, communication changes, and UAV faults can
-invalidate assignments that were valid when they were generated. A useful
-decision system must therefore reason not only about what the fleet should do
-now, but also about how the mission should be revised after the operational
-state changes. Initial resource-constrained mission planning and runtime
-replanning are coupled parts of the same decision problem.
+invalidate existing assignments. Initial resource-constrained mission planning
+and runtime replanning must consequently be treated as coupled parts of the
+same decision problem.
 
-Existing work has advanced fire detection, aerial scene understanding, damage
-assessment, navigation, and multi-UAV coordination
-\cite{erdelj2017help}. These capabilities provide essential parts of a rescue
-system, but they are commonly developed and evaluated as separate stages. As a
-result, strong perception does not by itself establish that detected fire
-conditions can be converted into a feasible fleet mission, while a feasible
-initial mission plan does not establish that the mission can remain effective
-under subsequent perturbations. The unresolved challenge is the high-level
-decision layer that connects fire-situation understanding,
-resource-constrained mission planning, execution feedback, and runtime
-replanning within one continuous loop.
+Existing work has advanced the individual capabilities needed for this process
+\cite{erdelj2017help}. Thermal--RGB fusion, aerial semantic segmentation, and
+learning-based 3D reconstruction improve fire detection and scene modeling
+\cite{yuan2021uavfire,zhang2022uavtransformer,
+yang2022uav3dreconstruction}, while autonomous exploration and mapping and
+next-best-view planning update environmental knowledge and reduce observation
+uncertainty \cite{popovic2021uavdisaster,bircher2016nbv}. On the action side,
+deep reinforcement learning and coverage path planning support navigation and
+large-area search \cite{xiao2021uavrl,yu2022coverageuav}, whereas multi-agent
+reinforcement learning and human--robot collaboration support task allocation
+and search-and-rescue operations
+\cite{yang2023multiagentuav,waharte2021uavsar}. However, these capabilities are
+commonly optimized and evaluated separately, often from a fixed initial state.
+They therefore do not establish how visual and spatial evidence can be converted
+into fire points and task zones for resource-constrained mission planning, or
+how an initially feasible allocation should be revised when the fire, fleet, or
+resource state changes.
 
-Large language models (LLMs) and multimodal LLMs offer a flexible interface for
-this layer because they can connect visual interpretation, task decomposition,
-and high-level planning \cite{driess2023palme}. However, free-form generation
-alone is insufficient for a resource-constrained, safety-relevant mission. An
-LLM may produce a coherent plan that violates fleet constraints, overlook a
-relevant lesson from a previous case, or continue to rely on an obsolete plan
-after execution conditions change. The central question of this work is
-therefore whether LLMs can serve as the high-level closed-loop decision core of
-a multi-UAV wildfire rescue system, and how Validation, Memory, and Runtime
+Large language models (LLMs) provide a flexible interface between high-level
+intent, structured observations, and robot behavior. SayCan grounds instructions
+in executable skills \cite{ahn2022saycan}, Code as Policies generates
+programmatic control policies \cite{liang2023codeaspolicies}, and related design
+guidance exposes tools and environmental constraints to ChatGPT-generated robot
+workflows \cite{vemprala2023chatgptrobotics}. Embodied and multimodal models
+further connect reasoning to physical state: RT-1 learns vision-language-action
+policies \cite{brohan2023rt1}, PaLM-E incorporates visual inputs and robot states
+\cite{driess2023palme}, and Socratic Models compose specialized vision and
+language models \cite{zeng2023socratic}. These approaches support task
+decomposition and action sequencing, but they also show that generated actions
+require grounding and external feasibility checks. Embodied and multimodal
+models are generally evaluated on individual robots and predefined manipulation
+or navigation tasks. Moving to a fleet-level decision layer introduces coupling
+among vehicle states, task priorities, routes, and shared resources; linguistic
+coherence therefore does not ensure that assignments jointly respect
+endurance, payload, communication, priority, and safety constraints.
+
+LLM-based agents have also used environmental feedback and accumulated
+experience for sequential decision making. Inner Monologue revises embodied
+plans from language-based feedback \cite{huang2023innermonologue}, LM-Nav uses
+semantic waypoints for open-world navigation \cite{shah2023lmnav}, and Voyager
+combines an LLM agent with an automatic curriculum and a growing skill library
+\cite{wang2023voyager}. These systems primarily target single-agent embodied
+environments rather than dynamic, interdependent tasks across a
+resource-constrained fleet. They establish that feedback and accumulated
+experience can improve sequential behavior, but do not establish how these
+capabilities should be combined with fleet-wide resource constraints or how
+their importance changes as operational pressure increases. Existing research
+therefore provides the main ingredients for perception, planning, coordination,
+and feedback, but not a common high-level decision loop that connects
+fire-situation understanding, resource-constrained mission planning,
+Validation, Memory, and Runtime Replanning. Strong perception does not by
+itself establish that detected fire conditions can be converted into a feasible
+fleet mission, while a feasible initial mission plan does not establish that the
+mission can remain effective under subsequent perturbations. The central
+question is whether LLMs can serve as the high-level closed-loop decision core
+of a multi-UAV wildfire rescue system, and how Validation, Memory, and Runtime
 Replanning sustain that role as operational pressure increases.
 
-We address this question by formulating multi-UAV wildfire rescue as a decision
-loop from aerial observation to fire-situation understanding,
-resource-constrained mission planning, Validation, execution feedback, and
-Runtime Replanning.
-The resulting LLM-centered closed-loop decision framework uses Vision Analysis
-and Mission Planning to transform observations into an initial fleet mission,
-but its design is organized around the risks that one-shot generation alone
-cannot address. Semantic Validation and Deterministic Rule Validation guard
-against plans that are infeasible or tactically implausible. Episodic and Lesson
-Memory retrieve prior cases and distilled guidance when the current
-mission-planning problem becomes less routine. Runtime Replanning responds to
-changes in the fire, fleet, resources, or schedule by repairing the active
-mission. Together, these mechanisms turn LLM planning from a one-shot output
-into a decision process that can be checked, informed by experience, and
-revised during execution.
+We address this question with an LLM-centered closed-loop decision framework
+that transforms aerial observations through Vision Analysis and Mission
+Planning into an initial fleet mission. Semantic Validation and Deterministic
+Rule Validation reject plans that are tactically implausible or structurally
+invalid, converting validation failures into targeted feedback for Mission
+Planning. Episodic Memory retrieves concrete prior cases, whereas Lesson Memory
+provides distilled guidance about recurring planning and resource-management
+patterns. Runtime Replanning repairs the affected part of the active mission
+after changes in the fire, fleet, resources, or schedule. Together, these
+mechanisms turn one-shot LLM planning into a decision process that connects
+fire-situation understanding, resource-constrained mission planning,
+Validation, execution feedback, and Runtime Replanning within one continuous
+loop.
 
-To evaluate the resulting closed-loop capability, we construct a
-real-UAV-informed AirSim suite that progressively increases operational
-pressure. Observation, energy, payload, and communication conditions are
-calibrated from a real platform, while 80 fixed evaluation episodes are
-organized into four difficulty levels. The lower levels emphasize
-fire-situation understanding and resource-constrained mission planning; the
-higher levels introduce stronger operational pressure through tighter resource
-and scheduling conditions together with runtime perturbations.
-Six mission-level metrics separate task completion from response, mission time,
-event stability, resource pressure, and coordination, allowing the evaluation
-to distinguish whether a system completes the rescue tasks from how
-well it preserves execution quality and mission continuity.
+We evaluate the framework in a real-UAV-informed AirSim suite through
+end-to-end comparisons, controlled ablations, and compact-planner fine-tuning.
 
 The main contributions of this work are summarized as follows:
 \begin{enumerate}[leftmargin=1.6em,itemsep=2pt,topsep=3pt]

@@ -1,27 +1,22 @@
 \section{Task Modeling and System Design}
+\label{sec:system-design}
+
+This section formulates multi-UAV wildfire rescue as a sequence from
+fire-situation understanding to resource-constrained mission planning and
+runtime replanning, and presents the LLM-centered closed-loop decision framework
+that implements this sequence. The task model represents aerial observations,
+fire points, task zones, UAV operational states, mission constraints, runtime
+perturbations, and the corresponding initial and revised mission plans. It
+exposes three decision risks: a generated plan may violate tactical or structural
+constraints, one-shot reasoning may fail to use relevant prior experience, and
+an initially feasible plan may become obsolete during execution. As shown in
+Figure~\ref{fig:method-overview}, Vision Analysis and Mission Planning construct
+candidate plans, Validation checks them before execution, Memory supplies prior
+experience, and Runtime Replanning revises the active mission after operational
+state changes. The following subsections detail the task model and system
+components.
 
 \subsection{Task Modeling}
-
-Wildfire rescue is a closed-loop decision task rather than an isolated
-perception or allocation problem. In an operational mission, aerial observations
-first reveal dispersed fire points; these points must then be organized into
-actionable task zones. The fleet must allocate its limited energy,
-payload, and flight time to these regions, while unexpected failures or changes
-in the fire situation may require the current plan to be revised during
-execution. We therefore abstract the real rescue workflow as a sequence from
-fire-situation understanding to resource-constrained mission planning and
-runtime replanning.
-
-This workflow exposes three risks that organize the system design. First, a
-generated mission plan can appear coherent while violating tactical or
-structural constraints. Second, as resource and scheduling interactions become
-more complex, one-shot reasoning may fail to use relevant experience from
-previous missions. Third, a plan that is feasible initially can become obsolete
-after the fire, fleet, or mission state changes. High-level closed-loop decision
-making must therefore check candidate plans before execution, recover relevant
-experience when operational pressure increases, and revise the active mission
-after runtime perturbations. The task model below represents the information
-needed to support this continuing decision loop.
 
 For each mission, the rescue world is represented by the structured state
 \[
@@ -66,24 +61,9 @@ needed to design and evaluate a closed-loop system.
     \label{fig:method-overview}
 \end{figure*}
 
-Based on the task model above, the proposed LLM-centered closed-loop decision
-framework is organized around the flow of mission state, candidate plans,
-corrective feedback, and prior experience.
-Before execution, Vision Analysis transforms aerial fire imagery into fire
-points and task zones. Mission Planning combines this representation with fleet
-states, operational constraints, and retrieved experience from Memory to
-produce a candidate plan. Validation then either accepts the plan or routes
-targeted feedback back to Mission Planning for correction. This pre-execution
-loop can repeat until an executable mission plan is accepted.
-
-During execution, the accepted plan is evaluated against updated fleet states
-and runtime perturbations. When an event invalidates part of the plan, Runtime
-Replanning uses the current execution state and relevant Episodic Memory to
-revise the affected part. Mission traces and outcomes are subsequently stored
-as episodic cases or distilled into lessons by Memory. In this way,
-Memory supports both initial planning and runtime replanning, while Validation
-and execution feedback close the decision loop at different stages.
-Figure~\ref{fig:method-overview} shows this information and feedback flow. 
+Figure~\ref{fig:method-overview} summarizes the flow of mission state, candidate
+plans, corrective feedback, and prior experience among the system components,
+whose individual roles are described below.
 
 \paragraph{Vision Analysis.} Vision Analysis anchors the decision loop by
 reducing the ambiguity between raw aerial observations and the planning state.
