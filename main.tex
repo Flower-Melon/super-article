@@ -30,11 +30,11 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 \markboth{IEEE Transactions on Industrial Informatics, Vol. XX, No. XX, 2026}
-{Author One \MakeLowercase{\textit{et al.}}: Closed-Loop LLM Agents for Multi-UAV Wildfire Rescue}
+{Author One \MakeLowercase{\textit{et al.}}: CLoMA-UWR: LLM-Centered Closed-Loop Multiagent Framework for Multi-UAV Wildfire Rescue}
 
 \begin{document}
 
-\title{Closed-Loop LLM Agents for Multi-UAV Wildfire Rescue}
+\title{CLoMA-UWR: LLM-Centered Closed-Loop Multiagent Framework for Multi-UAV Wildfire Rescue}
 
 \author{Author One and Author Two%
 \thanks{Manuscript received Month XX, 2026; revised Month XX, 2026.}%
@@ -44,7 +44,29 @@ Postal Code, Country (e-mail: author@example.com).}}
 \maketitle
 
 \begin{abstract}
-Multi-UAV wildfire rescue requires uncertain aerial observations to be translated into fleet missions that satisfy resource and safety constraints and remain effective as operational conditions change. We investigate whether large language models (LLMs) can serve as the high-level closed-loop decision core of such a system. We formulate wildfire rescue as a closed-loop decision problem. The resulting LLM-centered closed-loop decision framework integrates fire-situation understanding and resource-constrained mission planning with Validation, Memory, and Runtime Replanning. It is evaluated in a real-UAV-informed AirSim suite spanning four difficulty levels. Across four downstream foundation-model configurations, the framework maintains high basic task completion, although execution quality declines as operational pressure increases. Controlled ablations show that Validation, Memory, and Runtime Replanning provide complementary benefits at different levels of operational pressure. On simple and normal episodes, a fine-tuned Qwen3-8B planner retains 98.24\% of the Gemini~3.1~Pro teacher planner's average score while substantially reducing planning overhead. These results characterize the potential and limitations of LLMs for high-level closed-loop decision making in adaptive multi-UAV wildfire rescue. The implementation is available at \url{https://github.com/tongsuhdyem/Pipeline}.
+Reliable multi-UAV wildfire rescue requires closed-loop decision making that
+converts uncertain aerial observations into executable fleet plans and
+preserves mission continuity under runtime perturbations.
+Existing UAV approaches commonly optimize perception, navigation, or task
+allocation as separate capabilities, leaving a gap between fire-situation
+understanding, resource-constrained mission planning, and runtime replanning.
+To close this gap, we develop CLoMA-UWR, an LLM-centered closed-loop multiagent
+framework for multi-UAV wildfire rescue. CLoMA-UWR transforms aerial
+observations into initial mission plans through Vision Analysis and Mission Planning,
+audits candidate plans through Validation, uses Memory to inform subsequent
+decisions, and invokes Runtime Replanning after runtime perturbations. A
+real-UAV-informed AirSim suite evaluates it across four difficulty levels with
+resource limitations, scheduling constraints, and runtime perturbations. Across
+four downstream foundation-model configurations, CLoMA-UWR outperforms an
+Optimization-Based Planner in task completion and execution quality under hard
+and expert conditions. Controlled ablations identify the condition-dependent
+roles of Validation, Memory, and Runtime Replanning. On simple and normal episodes, a
+fine-tuned Qwen3-8B planner retains 98.24\% of the Gemini~3.1~Pro teacher
+planner's average score while reducing mean planning time from 37.50 to
+14.01~s and mean planning-token usage from 13,353 to 3,593. These results
+demonstrate the effectiveness of CLoMA-UWR for adaptive multi-UAV wildfire
+rescue.
+The implementation is available at \url{https://github.com/tongsuhdyem/Pipeline}.
 \end{abstract}
 
 \begin{IEEEkeywords}

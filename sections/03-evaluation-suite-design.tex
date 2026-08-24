@@ -2,9 +2,8 @@
 \label{sec:evaluation-suite}
 
 This section presents a controlled, real-UAV-informed evaluation suite in
-AirSim for testing whether high-level closed-loop decision making with the
-LLM-centered closed-loop decision framework remains effective as operational
-pressure increases. It instantiates the task model in
+AirSim for testing whether CLoMA-UWR remains effective as operational pressure
+increases. It instantiates the task model in
 Section~\ref{sec:system-design} through real-to-sim calibration, difficulty
 stratification, and mission-level metrics, which ground the simulated setting,
 vary operational pressure, and separate task completion, execution quality, and
@@ -38,21 +37,24 @@ set from which AirSim configures each simulated UAV and its environment.
 For each UAV, the configured mission must satisfy
 \begin{equation}
 \begin{aligned}
-\mathcal{E}_{\mathrm{UAV}}=\{&(h,v,m,e_{\mathrm{avail}},d)\mid\\
+\mathcal{E}_{\mathrm{UAV}}=\{&(h,v,m,e_{\mathrm{avail}},r)\mid\\
     &h\in \mathcal{H}_{\mathrm{safe}},\quad
       v\in \mathcal{V}_{\mathrm{safe}},\\
     &m\leq m_{\max},\quad
       e_{\mathrm{req}}+e_{\mathrm{res}}\leq e_{\mathrm{avail}},\\
-    &d\leq d_{\mathrm{link}}\}.
+    &r\leq r_{\mathrm{link}}\}.
 \end{aligned}
 \label{eq:uav-envelope}
 \end{equation}
-where $h$, $v$, $m$, $e_{\mathrm{avail}}$, and $d$ denote flight altitude,
-velocity, payload mass, available energy, and distance to the coordination link. The safe altitude
-and velocity ranges are specified by the operating policy. The payload and energy
-bounds are grounded in the airframe, propulsion system, and battery; the energy
-reserve enforces a safe return; and the link bound is determined by the deployed
-communication configuration. Thus, the numerical bounds combine hardware
+where $\mathcal{E}_{\mathrm{UAV}}$ is the feasible UAV configuration set;
+$h$, $v$, $m$, $e_{\mathrm{avail}}$, and $r$ denote flight altitude, velocity,
+payload mass, available energy, and communication-link distance,
+respectively. $\mathcal{H}_{\mathrm{safe}}$ and
+$\mathcal{V}_{\mathrm{safe}}$ are the safe altitude and velocity sets specified
+by the operating policy; $m_{\max}$ is the maximum payload mass;
+$e_{\mathrm{req}}$ and $e_{\mathrm{res}}$ are the energy required for the
+mission and the reserve energy for a safe return; and $r_{\mathrm{link}}$ is the
+maximum communication-link distance. These bounds combine hardware
 specifications, flight-safety policy, and deployment configuration. Any
 configuration that violates
 Eq.~\ref{eq:uav-envelope} is excluded before episode generation. The real UAV
@@ -184,14 +186,22 @@ s_{\mathrm{coord}}
 \end{aligned}
 \label{eq:mission-level-scores}
 \end{equation}
-Here, $[x]_0^1=\min\{1,\max\{0,x\}\}$ clips a value to $[0,1]$;
+Here, $s_{\mathrm{comp}}$, $s_{\mathrm{resp}}$, $s_{\mathrm{time}}$,
+$s_{\mathrm{stab}}$, $s_{\mathrm{res}}$, and $s_{\mathrm{coord}}$ denote the
+completion, response, mission time, event stability, resource pressure, and
+coordination scores, respectively. $[x]_0^1=\min\{1,\max\{0,x\}\}$ clips a
+value $x$ to $[0,1]$;
 $l_{\mathrm{resp}}$, $u_{\mathrm{resp}}$, $l_{\mathrm{time}}$, and
 $u_{\mathrm{time}}$ are fixed time-reference thresholds. $N_e$ is the number
-of runtime perturbations, and $\mathrm{Recovered}(e)$ indicates recovery by a
-feasible revision within the allowed window. $p_j\in[0,1]$ and $\bar p$ denote
-the per-UAV and fleet-average resource pressure. $G(\cdot)\in[0,1]$ is the
-Gini coefficient of the assigned task counts $\mathbf{n}$, flight distances
-$\mathbf{d}$, or execution durations $\boldsymbol{\tau}$.
+of runtime perturbations, $e$ indexes these perturbations, and
+$\mathrm{Recovered}(e)$ indicates recovery from perturbation $e$ by a feasible
+revision within the allowed window. $\mathbb{I}(\cdot)$ is the
+indicator function, which equals 1 when its condition is true and 0 otherwise.
+$p_j\in[0,1]$ and $\bar p$ denote the resource pressure of UAV $j$ and the
+fleet-average resource pressure, respectively, where $j$ indexes the UAVs in
+the fleet. $G(\cdot)\in[0,1]$ is the Gini coefficient of the assigned task
+counts $\mathbf{n}$, flight distances $\mathbf{d}$, or execution durations
+$\boldsymbol{\tau}$.
 
 Because no perturbations are introduced in the simple and normal settings,
 their applicable metric set $\mathcal{K}_d$ contains completion, response,
@@ -211,16 +221,16 @@ w_{k,d}&\geq0,\qquad
 \end{aligned}
 \label{eq:final-evaluation-score}
 \end{equation}
-where $w_{k,d}$ is the normalized weight of metric $k$ at difficulty level $d$,
-$\rho_i\in[0,1]$ is the difficulty coefficient of episode $i$, and $\lambda\geq0$
-controls the strength of the difficulty reward. The normalization by
-$1+\lambda$ ensures that $S_d\in[0,100]$. The component scores remain
-available for diagnostic analysis, while $S_d$ provides a unified measure for
-overall comparison.
+Here, $s_{i,k}$ is the score of episode $i$ for metric $k$, and $w_{k,d}$
+is its normalized weight at difficulty level $d$. The coefficient
+$\rho_i\in[0,1]$ represents episode difficulty, while $\lambda\geq0$ controls
+the difficulty reward; division by $1+\lambda$ keeps $S_d$ within $[0,100]$.
+The component scores support diagnostic analysis, whereas $S_d$ provides the
+overall comparison score for level $d$.
 
 Together, the staged episode difficulty and decomposed metrics provide a common
-basis for testing the three questions examined next: whether the complete
-framework sustains high-level closed-loop decision making, which mechanisms
+basis for testing the three questions examined next: whether CLoMA-UWR sustains
+high-level closed-loop decision making, which mechanisms
 matter as operational pressure increases, and how much capability for
 resource-constrained mission planning can be retained by a compact planner.
 

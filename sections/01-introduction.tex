@@ -3,12 +3,13 @@
 \label{sec:introduction}
 
 \IEEEPARstart{W}{ildfires} threaten ecosystems, infrastructure, and human safety
-\cite{bowman2020wildfire}. UAVs can rapidly observe hazardous and inaccessible
-areas through flexible aerial sensing \cite{allan2022remote}, but operational
-response requires observations to be converted into task zones, assigned across
-a resource-limited fleet, and revised as the fire or UAV state changes.
-Multi-UAV wildfire rescue is therefore a closed-loop decision problem rather
-than an isolated perception or path-planning task.
+\cite{bowman2020wildfire}. In wildfire emergency response, UAVs can rapidly
+observe hazardous and inaccessible areas through flexible aerial sensing
+\cite{allan2022remote}. Turning this capability into an effective field
+operation, however, requires observations to be converted into task zones,
+assigned across a resource-limited fleet, and revised as the fire or UAV state
+changes. Multi-UAV wildfire rescue is therefore a closed-loop decision problem
+rather than an isolated perception or path-planning task.
 
 An initial mission must be feasible for the current fleet: task priorities must
 be matched to vehicle locations, endurance, payload, communication, and safety
@@ -36,53 +37,47 @@ into fire points and task zones for resource-constrained mission planning, or
 how an initially feasible allocation should be revised when the fire, fleet, or
 resource state changes.
 
-Large language models (LLMs) provide a flexible interface between high-level
-intent, structured observations, and robot behavior. SayCan grounds instructions
-in executable skills \cite{ahn2022saycan}, Code as Policies generates
-programmatic control policies \cite{liang2023codeaspolicies}, and related design
-guidance exposes tools and environmental constraints to ChatGPT-generated robot
-workflows \cite{vemprala2023chatgptrobotics}. Embodied and multimodal models
-further connect reasoning to physical state: RT-1 learns vision-language-action
-policies \cite{brohan2023rt1}, PaLM-E incorporates visual inputs and robot states
+A high-level decision layer must convert structured observations into
+executable fleet plans. Large language models (LLMs) provide a
+flexible interface for this role: SayCan grounds instructions in executable
+skills \cite{ahn2022saycan}, Code as Policies generates programmatic control
+policies \cite{liang2023codeaspolicies}, and related design guidance exposes
+tools and environmental constraints to ChatGPT-generated robot workflows
+\cite{vemprala2023chatgptrobotics}. Embodied and multimodal models further
+connect reasoning to physical state: RT-1 learns vision-language-action policies
+\cite{brohan2023rt1}, PaLM-E incorporates visual inputs and robot states
 \cite{driess2023palme}, and Socratic Models compose specialized vision and
-language models \cite{zeng2023socratic}. These approaches support task
-decomposition and action sequencing, but they also show that generated actions
-require grounding and external feasibility checks. Embodied and multimodal
-models are generally evaluated on individual robots and predefined manipulation
-or navigation tasks. Moving to a fleet-level decision layer introduces coupling
-among vehicle states, task priorities, routes, and shared resources; linguistic
-coherence therefore does not ensure that assignments jointly respect
-endurance, payload, communication, priority, and safety constraints.
+language models \cite{zeng2023socratic}. These approaches establish useful
+mechanisms for task decomposition, action sequencing, and physical grounding,
+but are generally evaluated on individual robots and predefined manipulation or
+navigation tasks rather than resource-constrained mission planning for a
+multi-UAV fleet.
 
 LLM-based agents have also used environmental feedback and accumulated
 experience for sequential decision making. Inner Monologue revises embodied
 plans from language-based feedback \cite{huang2023innermonologue}, LM-Nav uses
 semantic waypoints for open-world navigation \cite{shah2023lmnav}, and Voyager
 combines an LLM agent with an automatic curriculum and a growing skill library
-\cite{wang2023voyager}. These systems primarily target single-agent embodied
-environments rather than dynamic, interdependent tasks across a
-resource-constrained fleet. They establish that feedback and accumulated
-experience can improve sequential behavior, but do not establish how these
-capabilities should be combined with fleet-wide resource constraints or how
-their importance changes as operational pressure increases. Existing research
-therefore provides the main ingredients for perception, planning, coordination,
-and feedback, but not a common high-level decision loop that connects
-fire-situation understanding, resource-constrained mission planning,
-Validation, Memory, and Runtime Replanning. Strong perception does not by
-itself establish that detected fire conditions can be converted into a feasible
-fleet mission, while a feasible initial mission plan does not establish that the
-mission can remain effective under subsequent perturbations. The central
-question is whether LLMs can serve as the high-level closed-loop decision core
-of a multi-UAV wildfire rescue system, and how Validation, Memory, and Runtime
-Replanning sustain that role as operational pressure increases.
+\cite{wang2023voyager}. These systems establish that feedback and accumulated
+experience can improve sequential behavior, but primarily target single-agent
+embodied environments rather than dynamic, interdependent tasks across a
+resource-constrained fleet. Existing research therefore provides the main
+ingredients for perception, planning, coordination, and feedback, but leaves
+two operational requirements unresolved. First, linguistic coherence does not
+ensure that a mission plan jointly respects endurance, payload, communication,
+priority, and safety constraints. Second, an initially feasible mission does
+not ensure mission continuity after the fire, fleet, resource, or schedule state
+changes. A common high-level decision loop must connect fire-situation
+understanding and resource-constrained mission planning with Validation, Memory,
+and Runtime Replanning to address both requirements as operational pressure
+increases.
 
-We address this question with an LLM-centered closed-loop decision framework
-that transforms aerial observations through Vision Analysis and Mission
-Planning into an initial fleet mission. Semantic Validation and Deterministic
-Rule Validation reject plans that are tactically implausible or structurally
-invalid, converting validation failures into targeted feedback for Mission
-Planning. Episodic Memory retrieves concrete prior cases, whereas Lesson Memory
-provides distilled guidance about recurring planning and resource-management
+To address these requirements, we develop CLoMA-UWR, an LLM-centered closed-loop
+multiagent framework that transforms aerial observations through Vision Analysis
+and Mission Planning into an initial mission plan. Validation rejects plans that are
+tactically implausible or structurally invalid, converting validation failures
+into targeted feedback for Mission Planning. Memory retrieves relevant prior
+experience and guidance about recurring planning and resource-management
 patterns. Runtime Replanning repairs the affected part of the active mission
 after changes in the fire, fleet, resources, or schedule. Together, these
 mechanisms turn one-shot LLM planning into a decision process that connects
@@ -90,16 +85,16 @@ fire-situation understanding, resource-constrained mission planning,
 Validation, execution feedback, and Runtime Replanning within one continuous
 loop.
 
-We evaluate the framework in a real-UAV-informed AirSim suite through
+We evaluate CLoMA-UWR in a real-UAV-informed AirSim suite through
 end-to-end comparisons, controlled ablations, and compact-planner fine-tuning.
 
 The main contributions of this work are summarized as follows:
 \begin{enumerate}[leftmargin=1.6em,itemsep=2pt,topsep=3pt]
     \item We formulate resource-constrained multi-UAV wildfire rescue as a
-    high-level closed-loop decision problem and develop an LLM-centered
-    closed-loop decision framework that connects fire-situation understanding
-    and resource-constrained mission planning with Validation, Memory, and
-    Runtime Replanning.
+    high-level closed-loop decision problem and develop CLoMA-UWR, an
+    LLM-centered closed-loop multiagent framework that connects fire-situation
+    understanding and resource-constrained mission planning with Validation,
+    Memory, and Runtime Replanning.
     \item We construct a real-UAV-informed AirSim evaluation suite that exposes
     the decision loop to controlled increases in operational pressure through
     resource limitations, scheduling constraints, and runtime perturbations

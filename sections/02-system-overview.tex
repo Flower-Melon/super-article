@@ -1,10 +1,10 @@
-\section{Task Modeling and System Design}
+\section{CLoMA-UWR Framework}
 \label{sec:system-design}
 
 This section formulates multi-UAV wildfire rescue as a sequence from
 fire-situation understanding to resource-constrained mission planning and
-runtime replanning, and presents the LLM-centered closed-loop decision framework
-that implements this sequence. The task model represents aerial observations,
+runtime replanning, and presents CLoMA-UWR as the framework that implements this
+sequence. The task model represents aerial observations,
 fire points, task zones, UAV operational states, mission constraints, runtime
 perturbations, and the corresponding initial and revised mission plans. It
 exposes three decision risks: a generated plan may violate tactical or structural
@@ -18,7 +18,7 @@ components.
 
 \subsection{Task Modeling}
 
-For each mission, the rescue world is represented by the structured state
+For each mission, the rescue world is represented by the structured state $S$:
 \[
 S=\{O,F,R,U,C,E\}.
 \]
@@ -26,11 +26,11 @@ Here, $O$ denotes aerial observations; $F$ denotes fire points; $R$ denotes
 task zones; $U$ denotes UAV operational states; $C$ denotes mission constraints;
 and $E$ denotes runtime perturbations. This representation
 separates the underlying rescue world from the information available to the
-decision system. At mission start, the system receives $X_0=\{O,U,C\}$,
-whereas $F$ and $R$ must be inferred from the observation. When a runtime
-perturbation occurs, it receives the updated operational state $U_t$ and the
-observed perturbation $E_t$. The required outputs are an initial mission plan
-$P$ and, when necessary, a revised plan $P'$.
+decision system. At mission start, the system receives the initial input
+$X_0=\{O,U,C\}$, whereas $F$ and $R$ must be inferred from the observation. 
+When a runtime perturbation occurs, it receives the updated operational 
+state $U_t$ and the observed perturbation $E_t$. The required outputs are an 
+initial mission plan $P$ and, when necessary, a revised plan $P'$.
 
 The resulting task model comprises the following decision chain:
 \[
@@ -46,7 +46,7 @@ that plan to changes encountered during execution. This formulation captures
 the continuous rescue workflow while retaining the stage-specific information
 needed to design and evaluate a closed-loop system.
 
-\subsection{System Overview}
+\subsection{Proposed Framework}
 
 \begin{figure*}[!t]
     \centering
@@ -57,15 +57,15 @@ needed to design and evaluate a closed-loop system.
         \hbox to\hsize{\normalfont\footnotesize\hfil
             \hbox{\normalfont\footnotesize #1.\nobreakspace\nobreakspace #2}\hfil}}
     \makeatother
-    \caption{Overview of the proposed system.}
+    \caption{Overview of CLoMA-UWR.}
     \label{fig:method-overview}
 \end{figure*}
 
 Figure~\ref{fig:method-overview} summarizes the flow of mission state, candidate
-plans, corrective feedback, and prior experience among the system components,
+plans, corrective feedback, and prior experience among the CLoMA-UWR components,
 whose individual roles are described below.
 
-\paragraph{Vision Analysis.} Vision Analysis anchors the decision loop by
+\paragraph{Vision Analysis} Vision Analysis anchors the decision loop by
 reducing the ambiguity between raw aerial observations and the planning state.
 It converts raw aerial imagery into a structured description of the fire
 situation.
@@ -82,7 +82,7 @@ These cues require joint reasoning over appearance and spatial semantics.
 The resulting fire points and task zones provide the shared initial-state
 representation used by Mission Planning.
 
-\paragraph{Mission Planning.} Mission Planning addresses the fleet-level
+\paragraph{Mission Planning} Mission Planning addresses the fleet-level
 coupling among task priorities, vehicle states, and resource constraints. It is
 the core decision module and converts the structured fire situation produced by
 Vision Analysis into a candidate multi-UAV collaborative plan. A planning LLM
@@ -93,45 +93,32 @@ controllable, the LLM is restricted to a predefined set of allowable actions.
 Mission Planning combines the fire situation, retrieved experience,
 and operational constraints.
 It receives the structured fire situation from Vision Analysis,
-retrieves relevant past cases and lessons from both memory modules,
+retrieves relevant prior experience from Memory,
 and produces a coordinated plan in which each UAV's task chain respects
 the fleet's capabilities and the mission's operational constraints.
 Formally, the planning process is expressed as
 \begin{equation}
-P=\mathcal{G}\bigl(R,U,C,M_E(q),M_L(q)\bigr),
+P=\mathcal{G}\bigl(R,U,C,M(q)\bigr),
 \qquad q=q(R,U,C),
 \label{eq:memory-augmented-planning}
 \end{equation}
-where $\mathcal{G}$ denotes the planning LLM, $q$ is a query constructed from
-the current task zones, fleet states, and constraints, and $M_E(q)$ and $M_L(q)$
-denote the episodic cases and lessons retrieved for that query, respectively.
+where $\mathcal{G}$ denotes the planning LLM, $q(R,U,C)$ denotes the query
+construction from the current task zones, fleet states, and constraints, and $M(q)$ 
+denotes the prior experience retrieved from Memory for that query.
 The resulting $P$ is a candidate plan rather than an automatically trusted
 output; it is passed to Validation before mission execution.
 
-\paragraph{Validation.} Validation addresses the risk that a linguistically
+\paragraph{Validation} Validation addresses the risk that a linguistically
 coherent candidate plan may still be tactically implausible or structurally
-invalid. The module assesses each candidate plan through two sequential checks.
-Together, the two checks form the audit--correction loop: when either one
-rejects a plan, its feedback is routed back to Mission Planning for revision.
-This loop turns validation failures into targeted feedback for the next
-planning attempt.
-
-The first check, Semantic Validation, uses an independent LLM to evaluate the plan
-from a tactical rationality perspective. It examines zone coverage completeness,
-resource-task matching, payload adequacy, and overall strategic health.
-Using a separate LLM rather than asking the planning LLM to self-check
-avoids self-consistency bias.
-
-The second check, Deterministic Rule Validation, uses a rule engine to verify
-structural legality, including UAV existence, coordinate validity, and task chain
-completeness. Unlike the semantic check, this rule check asks whether the plan
-is structurally legal.
-This question can be answered deterministically within the defined rule set.
-Only a plan accepted by both checks proceeds to execution, preserving the
-separation between plan generation and plan acceptance.
+invalid. It evaluates tactical rationality and structural legality, including
+zone coverage completeness, resource-task matching, payload adequacy, UAV
+existence, coordinate validity, and task-chain completeness. When Validation
+rejects a plan, its feedback is routed back to Mission Planning as targeted
+guidance for revision. Only an accepted plan proceeds to execution, preserving
+the separation between plan generation and plan acceptance.
 
 
-\paragraph{Runtime Replanning.} Runtime Replanning addresses the risk that an
+\paragraph{Runtime Replanning} Runtime Replanning addresses the risk that an
 accepted plan becomes invalid after the operational state changes. This module
 handles runtime perturbations during mission execution.
 It takes a runtime state snapshot as input, including current positions, battery levels,
@@ -140,33 +127,28 @@ Its output is not a new global plan, but a local revision of the current plan.
 Unlike the main pipeline, Runtime Replanning reasons about a dynamic execution state and
 changes only the affected part of the plan.
 
-When a runtime perturbation occurs, the module retrieves similar fault cases
-from Episodic Memory as repair references.
+When a runtime perturbation occurs, the module retrieves similar prior cases
+from Memory as repair references.
 These cases describe how comparable failures were resolved in past missions,
 providing the replanning LLM with tactical precedents for the current situation.
 The resulting local revision closes the execution-feedback loop without
 restarting the complete pre-execution pipeline.
 
-\paragraph{Memory.} Memory addresses the risk that relevant prior experience is
+\paragraph{Memory} Memory addresses the risk that relevant prior experience is
 unavailable when coupled resource, scheduling, or event conditions make the
 current decision less routine. It allows the system to reuse past experience.
-The two memory modules differ in what they store and how their contents are
-used.
-
-Episodic Memory stores concrete successful cases as input--output pairs.
-Each case records the situation, the generated or revised plan,
-and the corresponding outcome.
-Cases are indexed by situational features, so that when a new mission situation arises,
-the system retrieves the most similar past cases as tactical references.
-Specifically, the episodic memory is represented as
+Each memory entry records a task situation, the generated or revised plan,
+validation feedback, runtime perturbations, the execution outcome, and reusable
+guidance extracted from the completed mission. Memory is represented as
 \begin{equation}
-M_E=\{(z_i,P_i,o_i)\}_{i=1}^{N_E},
-\label{eq:episodic-memory}
+M=\{(z_i,P_i,o_i)\}_{i=1}^{N},
+\label{eq:memory-store}
 \end{equation}
-where $z_i$, $P_i$, and $o_i$ denote the task situation, the associated plan,
-and the execution outcome of case $i$, respectively. For either episodic
-memory or lesson memory, the system retrieves the $K$ most semantically similar
-entries to the current query according to
+where $m_i=(z_i,P_i,o_i)$ denotes a memory entry, and $z_i$, $P_i$, and
+$o_i$ denote the task situation, the associated plan, and the execution outcome
+of completed mission $i$, respectively. Validation feedback, runtime perturbations, 
+and reusable guidance are retained as associated information. The system retrieves 
+the $K$ most semantically similar entries to the current query according to
 \begin{equation}
 \begin{aligned}
 \mathcal{R}_K(q,M)
@@ -178,22 +160,10 @@ entries to the current query according to
 \end{aligned}
 \label{eq:semantic-memory-retrieval}
 \end{equation}
-where $M\in\{M_E,M_L\}$ is the queried memory, $\phi(\cdot)$ maps a query
-or memory entry to its semantic embedding, and $\operatorname{sim}(\cdot,\cdot)$
-is the cosine similarity. The retrieved set is supplied to the corresponding
-planning or replanning prompt as reference information.
-
-Lesson Memory serves a different role. Instead of storing concrete cases,
-it keeps higher-level lessons distilled from every run.
-After each mission, an LLM reviews the full execution trace.
-The trace includes the initial plan, validation feedback, runtime perturbations,
-replanning actions, and final scores.
-The LLM then extracts concise, reusable lessons.
-These lessons capture patterns such as common planning mistakes, resource estimation biases,
-and effective repair strategies.
-Together, the two forms of Memory connect prior outcomes to current decisions:
-Episodic Memory supplies concrete tactical precedents, whereas Lesson Memory
-supplies reusable guidance about recurring planning and resource-management
-patterns.
+where $\mathcal{R}_K(q,M)$ is the set of the $K$ entries retrieved from $M$ for
+query $q$, $\phi(\cdot)$ maps a query or memory entry to its semantic embedding. 
+The retrieved set provides Mission Planning or Runtime Replanning with concrete 
+tacticalprecedents and reusable guidance about recurring planning, resource-management,
+and repair patterns.
 
 \endinput

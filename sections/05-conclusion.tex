@@ -1,39 +1,35 @@
 % !TEX root = ../main.tex
 \section{Conclusion}
 
-Within the task and evaluation setting studied here, the results support the
-use of LLMs as the high-level closed-loop decision core of a
-resource-constrained multi-UAV wildfire rescue system. This capability is not
-uniformly robust: the complete decision loop remains effective in terms of
-basic task completion, but execution quality and mission continuity deteriorate
-as operational pressure increases. The proposed LLM-centered closed-loop
-decision framework addresses this problem by connecting fire-situation
-understanding and resource-constrained mission planning with Validation,
-Memory, and Runtime Replanning.
+Within the task and evaluation setting studied here, this work examines the
+contribution of LLMs to resource-constrained multi-UAV wildfire rescue through
+CLoMA-UWR, which connects fire-situation understanding and resource-constrained
+mission planning with Validation, Memory, and Runtime Replanning. This
+integration enables LLMs to support a continuous rescue workflow that extends
+from interpreting the fire situation and coordinating a resource-limited fleet
+to adapting an active mission after operational state changes.
 
-Three sets of evidence support this conclusion. First, the Optimization-Based
-Planner remains competitive in the simple and normal episodes, whereas the
-complete framework maintains higher basic task completion and execution quality
-in the hard and expert episodes across four downstream foundation-model
-configurations. This also shows that end-to-end operation is not confined to
-one downstream model, although all four configurations lose execution quality
-under greater operational pressure. Second, the ablations show condition-dependent
-roles: Validation provides an occasional reliability safeguard, Memory becomes
+Across four downstream foundation-model configurations, CLoMA-UWR sustains high
+basic task completion as operational pressure increases, although execution
+quality and mission continuity deteriorate in harder episodes. The
+Optimization-Based Planner provides a non-LLM reference under the same
+evaluation protocol. The ablations further reveal condition-dependent roles:
+Validation provides an occasional reliability safeguard, Memory becomes
 increasingly valuable as resource and scheduling interactions intensify, and
 Runtime Replanning is critical when perturbations invalidate an active plan.
-Third, Qwen3-8B fine-tuned with validated planning demonstrations retains
+Meanwhile, Qwen3-8B fine-tuned with validated planning demonstrations retains
 98.24\% of the Gemini~3.1~Pro teacher planner's average score on simple and
 normal episodes, while reducing mean planning time by approximately 63\% and
-planning-token usage by 73\%. This final result supports lower-cost local
-deployment of Mission Planning within the evaluated setting.
+planning-token usage by 73\%. This supports lower-cost local deployment of
+Mission Planning within the evaluated setting.
 
-This answer remains limited to a calibrated simulation, a fixed
+These answers remain limited to a calibrated simulation, a fixed
 episode set, and one real-platform configuration. Moreover, the compact
 planner has not yet been evaluated under hard and expert runtime conditions.
 The evaluation also does not include a direct numerical comparison with an
 external end-to-end rescue method because existing systems assume different
 inputs, action spaces, resource constraints, and evaluation protocols. The
-reported evidence therefore supports the framework within the task and
+reported evidence therefore supports CLoMA-UWR within the task and
 evaluation setting defined here. Future work will extend the evaluation to
 real-flight and mixed real--sim trials, more diverse platforms and fire
 dynamics, and larger fleets, while developing more selective memory retrieval
