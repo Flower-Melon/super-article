@@ -24,17 +24,32 @@
 \usepackage{placeins}
 \usepackage{stfloats}
 \usepackage{microtype}
+% Fine-tune paragraph and float spacing while preserving the IEEEtran grid.
+\usepackage{flushend}
 \usepackage[hidelinks]{hyperref}
+
+% Keep dense two-column pages readable and reduce avoidable white gaps around
+% figures/tables.  These are layout parameters only; manuscript text is unchanged.
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{6pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{3pt plus 1pt minus 1pt}
+\setlength{\belowcaptionskip}{0pt}
+\emergencystretch=1.5em
+\clubpenalty=250
+\widowpenalty=250
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 \markboth{IEEE Transactions on Industrial Informatics, Vol. XX, No. XX, 2026}
-{Author One \MakeLowercase{\textit{et al.}}: CLoMA-UWR: LLM-Centered Closed-Loop Multiagent Framework for Multi-UAV Wildfire Rescue}
+{Author One \MakeLowercase{\textit{et al.}}: CLoMC-UWR: Automating Multi-UAV Wildfire Response via an LLM-Based Closed-Loop Mission Coordination System}
 
 \begin{document}
 
-\title{CLoMA-UWR: LLM-Centered Closed-Loop Multiagent Framework for Multi-UAV Wildfire Rescue}
+\title{CLoMC-UWR: Automating Multi-UAV Wildfire Response via an LLM-Based Closed-Loop Mission Coordination System}
 
 \author{Author One and Author Two%
 \thanks{Manuscript received Month XX, 2026; revised Month XX, 2026.}%
@@ -44,34 +59,34 @@ Postal Code, Country (e-mail: author@example.com).}}
 \maketitle
 
 \begin{abstract}
-Reliable multi-UAV wildfire rescue requires closed-loop decision making that
+Reliable multi-UAV wildfire response requires closed-loop mission coordination that
 converts uncertain aerial observations into executable fleet plans and
 preserves mission continuity under runtime perturbations.
-Existing UAV approaches commonly optimize perception, navigation, or task
-allocation as separate capabilities, leaving a gap between fire-situation
-understanding, resource-constrained mission planning, and runtime replanning.
-To close this gap, we develop CLoMA-UWR, an LLM-centered closed-loop multiagent
-framework for multi-UAV wildfire rescue. CLoMA-UWR transforms aerial
+Existing UAV studies address these capabilities using different task inputs,
+state representations, action spaces, resource assumptions, and evaluation
+protocols, limiting direct assessment of initial mission planning and runtime plan repair
+under common operating conditions. We therefore develop CLoMC-UWR, an LLM-based closed-loop mission
+coordination system for multi-UAV wildfire response. CLoMC-UWR transforms aerial
 observations into initial mission plans through Vision Analysis and Mission Planning,
-audits candidate plans through Validation, uses Memory to inform subsequent
-decisions, and invokes Runtime Replanning after runtime perturbations. A
+audits candidate plans through Validation, retrieves relevant prior mission records
+through Memory to inform subsequent planning, and invokes Runtime Replanning
+after runtime perturbations. A
 real-UAV-informed AirSim suite evaluates it across four difficulty levels with
-resource limitations, scheduling constraints, and runtime perturbations. Across
-four downstream foundation-model configurations, CLoMA-UWR outperforms an
+resource constraints, scheduling constraints, and runtime perturbations. Across
+four downstream foundation-model configurations, CLoMC-UWR outperforms an
 Optimization-Based Planner in task completion and execution quality under hard
 and expert conditions. Controlled ablations identify the condition-dependent
 roles of Validation, Memory, and Runtime Replanning. On simple and normal episodes, a
 fine-tuned Qwen3-8B planner retains 98.24\% of the Gemini~3.1~Pro teacher
 planner's average score while reducing mean planning time from 37.50 to
 14.01~s and mean planning-token usage from 13,353 to 3,593. These results
-demonstrate the effectiveness of CLoMA-UWR for adaptive multi-UAV wildfire
-rescue.
-The implementation is available at \url{https://github.com/tongsuhdyem/Pipeline}.
+demonstrate the effectiveness of CLoMC-UWR for adaptive multi-UAV wildfire
+response.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Closed-loop decision making, large language model agents, multi-UAV systems,
-real-to-simulation evaluation, wildfire rescue.
+Closed-loop mission coordination, large language models, multi-UAV systems,
+real-to-simulation evaluation, wildfire response.
 \end{IEEEkeywords}
 
 \input{sections/01-introduction}
@@ -82,5 +97,4 @@ real-to-simulation evaluation, wildfire rescue.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
-
 \end{document}

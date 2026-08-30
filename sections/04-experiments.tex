@@ -2,9 +2,9 @@
 \section{Experiments}
 \label{sec:experiments}
 
-This section evaluates CLoMA-UWR with the evaluation suite in
+This section evaluates CLoMC-UWR with the evaluation suite in
 Section~\ref{sec:evaluation-suite} through three settings. The first examines
-whether CLoMA-UWR outperforms an Optimization-Based Planner as
+whether CLoMC-UWR outperforms an Optimization-Based Planner as
 operational pressure increases and how sensitive it is to model choice. The
 second isolates how Validation, Memory, and Runtime Replanning address their
 respective decision risks, while the third tests whether validated
@@ -22,15 +22,15 @@ structured fire situation consistent, so differences among the four downstream
 foundation-model configurations reflect the downstream decision process.
 
 The Optimization-Based Planner is implemented with the CP-SAT solver in Google
-OR-Tools. It shares the Vision Analysis output, UAV states, mission constraints,
-and action space with CLoMA-UWR, and re-optimizes the remaining
+OR-Tools. It shares the Vision Analysis output, UAV operational states, mission constraints,
+and action space with CLoMC-UWR, and re-optimizes the remaining
 task chains from the updated operational state after each runtime perturbation.
 Its downstream decision process does not use an LLM, Validation, or Memory. The
 baseline and four foundation-model configurations use the same 80 episodes---20
 at each difficulty level---and the same execution and scoring procedure.
 
 \subsubsection{Ablation Setting}
-Using the DeepSeek~V4~Pro configuration, we compare CLoMA-UWR with w/o
+Using the DeepSeek~V4~Pro configuration, we compare CLoMC-UWR with w/o
 Validation, w/o Memory, and w/o Runtime Replanning. These variants respectively
 remove Validation, disable retrieval from Memory, and retain the initial plan
 after runtime perturbations. All other models, prompts, and execution settings
@@ -41,10 +41,10 @@ Replanning remains inactive; the w/o Runtime Replanning variant therefore
 introduces no other execution difference at these levels.
 
 \subsubsection{Fine-Tuning Data and Training}
-We construct 2,000 mission-planning demonstrations using CLoMA-UWR
+We construct 2,000 mission-planning demonstrations using CLoMC-UWR
 with Gemini~3.1~Pro as the teacher planner from mission situations disjoint from
-the 80 evaluation episodes. Each demonstration maps $(R,U,C)$ to $P$, pairing
-the task zones, UAV states, and mission constraints with the final multi-UAV
+the 80 evaluation episodes. Each demonstration maps $(\mathcal{Z},U,C)$ to $P$, pairing
+the task zones, UAV operational states, and mission constraints with the final multi-UAV
 plan accepted by Validation. These validated demonstrations specialize
 Qwen3-8B for the planning mapping in Section~\ref{sec:system-design}. We use a
 90\%/10\%
@@ -91,7 +91,7 @@ scores 49.77 and 21.53 in the hard and expert settings, respectively 9.26 and
 16.02 points below the lowest-scoring foundation-model configuration. Its expert
 completion score is 78.27, compared with 90.09--93.24 for the four
 configurations. Because its event stability score of 0 overlaps their 0--2.67
-range, the advantage of CLoMA-UWR also reflects task completion
+range, the advantage of CLoMC-UWR also reflects task completion
 and the other execution-quality metrics.
 
 \begin{figure}[!htbp]
@@ -116,7 +116,7 @@ increases.
 
 Taken together, the Optimization-Based Planner remains competitive in the
 simple and normal episodes, where no runtime perturbations occur. Under the
-higher operational pressure of the hard and expert episodes, CLoMA-UWR
+higher operational pressure of the hard and expert episodes, CLoMC-UWR
 maintains higher basic task completion and execution quality across
 all four downstream foundation-model configurations. The common decline in
 mission time and event stability under expert conditions nevertheless leaves
@@ -138,12 +138,12 @@ improvement.
 \input{tables/deepseek-ablation-results}
 
 Figure~\ref{fig:ablation-score-delta} visualizes the score change of each
-ablated variant relative to CLoMA-UWR.
+ablated variant relative to CLoMC-UWR.
 
 \begin{figure}[!t]
     \centering
     \includegraphics[width=\columnwidth]{figures/ablation-score-change-heatmap.png}
-    \caption{Change in overall score relative to CLoMA-UWR for each ablated
+    \caption{Change in overall score relative to CLoMC-UWR for each ablated
     variant and difficulty level. Negative values indicate performance
     degradation, while positive values indicate improvement.}
     \label{fig:ablation-score-delta}
@@ -154,7 +154,7 @@ increases.
 Removing Memory reduces the score by only 1.97 points in the
 simple setting and 0.69 points in the normal setting, but the reduction grows
 to 9.68 points in hard episodes and 15.45 points in expert episodes. This
-pattern indicates that retrieved cases and distilled lessons are most useful
+pattern indicates that retrieved task situations, plans, and outcomes are most useful
 when resource constraints, event interactions, and scheduling pressure make
 planning less routine.
 
@@ -170,7 +170,7 @@ uniformly in every episode. Validation acts as a low-frequency safeguard
 against invalid candidate plans, Memory contributes most when operational
 pressure makes planning less routine, and Runtime Replanning becomes critical
 when runtime perturbations invalidate an accepted plan. Their condition-dependent
-effects explain why all three are retained in CLoMA-UWR despite
+effects explain why all three are retained in CLoMC-UWR despite
 their different average score contributions.
 
 \subsection{Fine-Tuned Planner Evaluation}

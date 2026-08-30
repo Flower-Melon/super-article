@@ -1,10 +1,10 @@
 \begin{table*}[!t]
     \centering
     \caption{End-to-end results for the Optimization-Based Planner and
-    CLoMA-UWR across episode difficulty levels. Optimization-Based
+    CLoMC-UWR across episode difficulty levels. Optimization-Based
     denotes the Optimization-Based Planner, while each model name denotes the
-    corresponding downstream foundation-model configuration of CLoMA-UWR.
-    $S$ is the overall score, and the remaining columns report normalized mission-level scores in
+    corresponding downstream foundation-model configuration of CLoMC-UWR.
+    $S_d$ is the overall score at difficulty level $d$, and the remaining columns report normalized mission-level scores in
     $[0,100]$ (higher is better). Event stability is not applicable to the
     simple and normal settings and is denoted by ``--''. The highest observed
     value for each metric at every difficulty level is shown in bold when it is
@@ -18,7 +18,7 @@
         \toprule
         \multirow{2}{*}{\textbf{Difficulty}}
         & \multirow{2}{*}{\textbf{Configuration}}
-        & \multirow{2}{*}{\textbf{$S$}}
+        & \multirow{2}{*}{\textbf{$S_d$}}
         & \multicolumn{6}{c}{\textbf{Mission-level score}} \\
         \cmidrule(l){4-9}
         & &

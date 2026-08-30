@@ -2,14 +2,14 @@
 \section{Conclusion}
 
 Within the task and evaluation setting studied here, this work examines the
-contribution of LLMs to resource-constrained multi-UAV wildfire rescue through
-CLoMA-UWR, which connects fire-situation understanding and resource-constrained
+contribution of LLMs to resource-constrained multi-UAV wildfire response through
+CLoMC-UWR, which connects fire-situation understanding and resource-constrained
 mission planning with Validation, Memory, and Runtime Replanning. This
-integration enables LLMs to support a continuous rescue workflow that extends
+integration enables LLMs to support a continuous response workflow that extends
 from interpreting the fire situation and coordinating a resource-limited fleet
 to adapting an active mission after operational state changes.
 
-Across four downstream foundation-model configurations, CLoMA-UWR sustains high
+Across four downstream foundation-model configurations, CLoMC-UWR sustains high
 basic task completion as operational pressure increases, although execution
 quality and mission continuity deteriorate in harder episodes. The
 Optimization-Based Planner provides a non-LLM reference under the same
@@ -27,9 +27,10 @@ These answers remain limited to a calibrated simulation, a fixed
 episode set, and one real-platform configuration. Moreover, the compact
 planner has not yet been evaluated under hard and expert runtime conditions.
 The evaluation also does not include a direct numerical comparison with an
-external end-to-end rescue method because existing systems assume different
-inputs, action spaces, resource constraints, and evaluation protocols. The
-reported evidence therefore supports CLoMA-UWR within the task and
+external end-to-end response method because existing systems address different
+objectives using task-specific inputs, state representations, action spaces,
+resource assumptions, and evaluation protocols. The
+reported evidence therefore supports CLoMC-UWR within the task and
 evaluation setting defined here. Future work will extend the evaluation to
 real-flight and mixed real--sim trials, more diverse platforms and fire
 dynamics, and larger fleets, while developing more selective memory retrieval

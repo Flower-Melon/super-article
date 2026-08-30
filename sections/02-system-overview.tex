@@ -1,13 +1,13 @@
-\section{CLoMA-UWR Framework}
+\section{CLoMC-UWR System}
 \label{sec:system-design}
 
-This section formulates multi-UAV wildfire rescue as a sequence from
+This section formulates multi-UAV wildfire response as a sequence from
 fire-situation understanding to resource-constrained mission planning and
-runtime replanning, and presents CLoMA-UWR as the framework that implements this
+runtime plan repair, and presents CLoMC-UWR as the mission-coordination system that implements this
 sequence. The task model represents aerial observations,
 fire points, task zones, UAV operational states, mission constraints, runtime
 perturbations, and the corresponding initial and revised mission plans. It
-exposes three decision risks: a generated plan may violate tactical or structural
+exposes three coordination risks: a generated plan may violate tactical or structural
 constraints, one-shot reasoning may fail to use relevant prior experience, and
 an initially feasible plan may become obsolete during execution. As shown in
 Figure~\ref{fig:method-overview}, Vision Analysis and Mission Planning construct
@@ -18,24 +18,24 @@ components.
 
 \subsection{Task Modeling}
 
-For each mission, the rescue world is represented by the structured state $S$:
+For each mission, the response world is represented by the structured state $\mathcal{S}$:
 \[
-S=\{O,F,R,U,C,E\}.
+\mathcal{S}=\{O,F,\mathcal{Z},U,C,E\}.
 \]
-Here, $O$ denotes aerial observations; $F$ denotes fire points; $R$ denotes
-task zones; $U$ denotes UAV operational states; $C$ denotes mission constraints;
+Here, $O$ denotes aerial observations; $F$ denotes fire points; $\mathcal{Z}$
+denotes the set of task zones; $U$ denotes UAV operational states; $C$ denotes mission constraints;
 and $E$ denotes runtime perturbations. This representation
-separates the underlying rescue world from the information available to the
-decision system. At mission start, the system receives the initial input
-$X_0=\{O,U,C\}$, whereas $F$ and $R$ must be inferred from the observation. 
+separates the underlying response world from the information available to the
+coordination system. At mission start, the system receives the initial input
+$X_0=\{O,U,C\}$, whereas $F$ and $\mathcal{Z}$ must be inferred from the observation.
 When a runtime perturbation occurs, it receives the updated operational 
 state $U_t$ and the observed perturbation $E_t$. The required outputs are an 
 initial mission plan $P$ and, when necessary, a revised plan $P'$.
 
-The resulting task model comprises the following decision chain:
+The resulting task model comprises the following mission-coordination chain:
 \[
 \begin{gathered}
-O \rightarrow F \rightarrow R,\qquad (R,U,C) \rightarrow P, \\
+O \rightarrow F \rightarrow \mathcal{Z},\qquad (\mathcal{Z},U,C) \rightarrow P, \\
 (P,U_t,E_t) \rightarrow P'.
 \end{gathered}
 \]
@@ -43,10 +43,10 @@ The first two relations transform raw aerial observations into an actionable
 regional representation of the fire situation. The third relation generates an
 executable fleet plan under operational constraints. The final relation adapts
 that plan to changes encountered during execution. This formulation captures
-the continuous rescue workflow while retaining the stage-specific information
-needed to design and evaluate a closed-loop system.
+the continuous response workflow while retaining the stage-specific information
+needed to design and evaluate a closed-loop coordination system.
 
-\subsection{Proposed Framework}
+\subsection{Proposed System}
 
 \begin{figure*}[!t]
     \centering
@@ -57,15 +57,15 @@ needed to design and evaluate a closed-loop system.
         \hbox to\hsize{\normalfont\footnotesize\hfil
             \hbox{\normalfont\footnotesize #1.\nobreakspace\nobreakspace #2}\hfil}}
     \makeatother
-    \caption{Overview of CLoMA-UWR.}
+    \caption{Overview of CLoMC-UWR.}
     \label{fig:method-overview}
 \end{figure*}
 
 Figure~\ref{fig:method-overview} summarizes the flow of mission state, candidate
-plans, corrective feedback, and prior experience among the CLoMA-UWR components,
+plans, corrective feedback, and prior experience among the CLoMC-UWR components,
 whose individual roles are described below.
 
-\paragraph{Vision Analysis} Vision Analysis anchors the decision loop by
+\paragraph{Vision Analysis} Vision Analysis anchors the mission-coordination loop by
 reducing the ambiguity between raw aerial observations and the planning state.
 It converts raw aerial imagery into a structured description of the fire
 situation.
@@ -84,7 +84,7 @@ representation used by Mission Planning.
 
 \paragraph{Mission Planning} Mission Planning addresses the fleet-level
 coupling among task priorities, vehicle states, and resource constraints. It is
-the core decision module and converts the structured fire situation produced by
+the core planning module and converts the structured fire situation produced by
 Vision Analysis into a candidate multi-UAV collaborative plan. A planning LLM
 generates a complete task chain for each UAV in the fleet, covering task
 allocation, temporal sequencing, and endurance management. To keep outputs
@@ -96,15 +96,18 @@ It receives the structured fire situation from Vision Analysis,
 retrieves relevant prior experience from Memory,
 and produces a coordinated plan in which each UAV's task chain respects
 the fleet's capabilities and the mission's operational constraints.
-Formally, the planning process is expressed as
+Let $q=\mathcal{Q}(\mathcal{Z},U,C)$ be the query constructed from the current
+task zones, UAV operational states, and constraints, and let $\mathcal{R}_K(q,M)$ denote
+the $K$ entries retrieved from Memory $M$ for that query. Formally, the planning
+process is expressed as
 \begin{equation}
-P=\mathcal{G}\bigl(R,U,C,M(q)\bigr),
-\qquad q=q(R,U,C),
+P=\mathcal{G}\bigl(\mathcal{Z},U,C,\mathcal{R}_K(q,M)\bigr),
+\qquad q=\mathcal{Q}(\mathcal{Z},U,C),
 \label{eq:memory-augmented-planning}
 \end{equation}
-where $\mathcal{G}$ denotes the planning LLM, $q(R,U,C)$ denotes the query
-construction from the current task zones, fleet states, and constraints, and $M(q)$ 
-denotes the prior experience retrieved from Memory for that query.
+where $\mathcal{G}$ denotes the planning LLM and $\mathcal{Q}$ denotes the query
+construction function. The retrieval operator $\mathcal{R}_K$ is specified in
+the Memory module below.
 The resulting $P$ is a candidate plan rather than an automatically trusted
 output; it is passed to Validation before mission execution.
 
@@ -123,7 +126,7 @@ accepted plan becomes invalid after the operational state changes. This module
 handles runtime perturbations during mission execution.
 It takes a runtime state snapshot as input, including current positions, battery levels,
 payloads, and task progress for each UAV.
-Its output is not a new global plan, but a local revision of the current plan.
+Its output is not a new global plan, but a local plan repair of the current plan.
 Unlike the main pipeline, Runtime Replanning reasons about a dynamic execution state and
 changes only the affected part of the plan.
 
@@ -131,39 +134,37 @@ When a runtime perturbation occurs, the module retrieves similar prior cases
 from Memory as repair references.
 These cases describe how comparable failures were resolved in past missions,
 providing the replanning LLM with tactical precedents for the current situation.
-The resulting local revision closes the execution-feedback loop without
+The resulting local plan repair closes the execution-feedback loop without
 restarting the complete pre-execution pipeline.
 
 \paragraph{Memory} Memory addresses the risk that relevant prior experience is
 unavailable when coupled resource, scheduling, or event conditions make the
-current decision less routine. It allows the system to reuse past experience.
-Each memory entry records a task situation, the generated or revised plan,
-validation feedback, runtime perturbations, the execution outcome, and reusable
-guidance extracted from the completed mission. Memory is represented as
+current mission less routine. It allows the system to reuse past experience.
+Each memory entry records a task situation, its generated or revised plan, and
+the execution outcome of the completed mission. Memory is represented as
 \begin{equation}
-M=\{(z_i,P_i,o_i)\}_{i=1}^{N},
+M=\{(\sigma_i,P_i,o_i)\}_{i=1}^{N},
 \label{eq:memory-store}
 \end{equation}
-where $m_i=(z_i,P_i,o_i)$ denotes a memory entry, and $z_i$, $P_i$, and
+where $\mu_i=(\sigma_i,P_i,o_i)$ denotes a memory entry, and $\sigma_i$, $P_i$, and
 $o_i$ denote the task situation, the associated plan, and the execution outcome
-of completed mission $i$, respectively. Validation feedback, runtime perturbations, 
-and reusable guidance are retained as associated information. The system retrieves 
+of completed mission $i$, respectively. The system retrieves
 the $K$ most semantically similar entries to the current query according to
 \begin{equation}
 \begin{aligned}
 \mathcal{R}_K(q,M)
-&=\underset{m_i\in M}{\operatorname{TopK}}\;
-  \operatorname{sim}(q,m_i),\\
-\operatorname{sim}(q,m_i)
-&=\frac{\phi(q)^\top\phi(m_i)}
-{\lVert\phi(q)\rVert_2\lVert\phi(m_i)\rVert_2}.
+&=\underset{\mu_i\in M}{\operatorname{TopK}}\;
+  \operatorname{sim}(q,\mu_i),\\
+\operatorname{sim}(q,\mu_i)
+&=\frac{\phi(q)^\top\phi(\mu_i)}
+{\lVert\phi(q)\rVert_2\lVert\phi(\mu_i)\rVert_2}.
 \end{aligned}
 \label{eq:semantic-memory-retrieval}
 \end{equation}
 where $\mathcal{R}_K(q,M)$ is the set of the $K$ entries retrieved from $M$ for
 query $q$, $\phi(\cdot)$ maps a query or memory entry to its semantic embedding. 
-The retrieved set provides Mission Planning or Runtime Replanning with concrete 
-tacticalprecedents and reusable guidance about recurring planning, resource-management,
-and repair patterns.
+The retrieved set provides Mission Planning or Runtime Replanning with concrete
+precedents comprising prior task situations, associated plans, and execution
+outcomes.
 
 \endinput

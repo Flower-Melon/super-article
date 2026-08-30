@@ -2,16 +2,18 @@
 \label{sec:evaluation-suite}
 
 This section presents a controlled, real-UAV-informed evaluation suite in
-AirSim for testing whether CLoMA-UWR remains effective as operational pressure
-increases. It instantiates the task model in
-Section~\ref{sec:system-design} through real-to-sim calibration, difficulty
-stratification, and mission-level metrics, which ground the simulated setting,
-vary operational pressure, and separate task completion, execution quality, and
-mission continuity. As summarized in Table~\ref{tab:benchmark_comparison},
-existing settings cover only parts of the transition from aerial observation to
-task-zone construction, resource-constrained mission planning, and runtime
-replanning; the comparison concerns evaluation coverage rather than algorithmic
-performance. The following subsections detail the three design elements.
+AirSim for examining initial mission planning and runtime plan repair under calibrated resource
+bounds, perturbation conditions, and mission-level metrics. It instantiates the
+task model in Section~\ref{sec:system-design} through real-to-sim calibration,
+difficulty stratification, and mission-level metrics, which ground the simulated
+setting, vary operational pressure, and distinguish task completion, execution
+quality, and mission continuity. As summarized in
+Table~\ref{tab:benchmark_comparison}, existing settings cover different parts of
+the transition from aerial observation to task-zone construction,
+resource-constrained mission planning, and runtime plan repair. The comparison
+concerns evaluation coverage under their respective task definitions rather
+than algorithmic performance. The following subsections detail the three design
+elements.
 
 \input{tables/benchmark-capability-comparison}
 
@@ -30,7 +32,7 @@ performance. The following subsections detail the three design elements.
 The first design property is realized through a co-design between the real UAV
 platform and the AirSim simulation environment. As stated above, real UAV
 parameters constrain every evaluation episode. Accordingly, the real platform defines the
-engineering boundary of the rescue mission, while AirSim configures controllable
+engineering boundary of the response mission, while AirSim configures controllable
 and repeatable evaluation episodes within that boundary. Rather than treating the two as
 separate experimental settings, we use the real platform to define the feasible
 set from which AirSim configures each simulated UAV and its environment.
@@ -157,32 +159,32 @@ respectively. Event stability is evaluated only in the hard and expert settings,
 where runtime perturbations are introduced.
 
 All scores are normalized to $[0,100]$, with higher values indicating better
-performance. Let $Z$ be the set of task zones, $c_z\in[0,1]$ the completion
+performance. Let $\mathcal{Z}$ be the set of task zones, $c_z\in[0,1]$ the completion
 ratio of zone $z$, and $\omega_z$ its priority weight. Let
-$\bar t_{\mathrm{resp}}$ and $\tau$ denote the priority-weighted mean time to
+$\bar t_{\mathrm{resp}}$ and $T_{\mathrm{miss}}$ denote the priority-weighted mean time to
 first effective intervention and the total mission duration. The six scores are
 defined jointly as
 \begin{equation}
 \begin{aligned}
 s_{\mathrm{comp}}
-&=100\frac{\sum_{z\in Z}\omega_zc_z}
- {\sum_{z\in Z}\omega_z},\\
+&=100\frac{\sum_{z\in \mathcal{Z}}\omega_zc_z}
+ {\sum_{z\in \mathcal{Z}}\omega_z},\\
 s_{\mathrm{resp}}
 &=100\left[1-
 \left[\frac{\bar t_{\mathrm{resp}}-l_{\mathrm{resp}}}
  {u_{\mathrm{resp}}-l_{\mathrm{resp}}}\right]_0^1\right],\\
 s_{\mathrm{time}}
 &=100\left[1-
-\left[\frac{\tau-l_{\mathrm{time}}}
+\left[\frac{T_{\mathrm{miss}}-l_{\mathrm{time}}}
  {u_{\mathrm{time}}-l_{\mathrm{time}}}\right]_0^1\right],\\
 s_{\mathrm{stab}}
-&=\frac{100}{N_e}\sum_{e=1}^{N_e}
- \mathbb{I}\bigl(\mathrm{Recovered}(e)\bigr),\\
+&=\frac{100}{N_{\mathrm{evt}}}\sum_{a=1}^{N_{\mathrm{evt}}}
+ \mathbb{I}\bigl(\mathrm{Recovered}(a)\bigr),\\
 s_{\mathrm{res}}
  &=100\left[1-\frac{\bar p+\max_jp_j}{2}\right],\\
 s_{\mathrm{coord}}
 &=100\left[1-
-\frac{G(\mathbf{n})+G(\mathbf{d})+G(\boldsymbol{\tau})}{3}\right].
+\frac{G(\mathbf{n})+G(\boldsymbol{\ell})+G(\boldsymbol{\tau})}{3}\right].
 \end{aligned}
 \label{eq:mission-level-scores}
 \end{equation}
@@ -192,45 +194,43 @@ completion, response, mission time, event stability, resource pressure, and
 coordination scores, respectively. $[x]_0^1=\min\{1,\max\{0,x\}\}$ clips a
 value $x$ to $[0,1]$;
 $l_{\mathrm{resp}}$, $u_{\mathrm{resp}}$, $l_{\mathrm{time}}$, and
-$u_{\mathrm{time}}$ are fixed time-reference thresholds. $N_e$ is the number
-of runtime perturbations, $e$ indexes these perturbations, and
-$\mathrm{Recovered}(e)$ indicates recovery from perturbation $e$ by a feasible
+$u_{\mathrm{time}}$ are fixed time-reference thresholds. $N_{\mathrm{evt}}$ is the number
+of runtime perturbations, $a$ indexes these perturbations, and
+$\mathrm{Recovered}(a)$ indicates recovery from perturbation $a$ by a feasible
 revision within the allowed window. $\mathbb{I}(\cdot)$ is the
 indicator function, which equals 1 when its condition is true and 0 otherwise.
 $p_j\in[0,1]$ and $\bar p$ denote the resource pressure of UAV $j$ and the
 fleet-average resource pressure, respectively, where $j$ indexes the UAVs in
 the fleet. $G(\cdot)\in[0,1]$ is the Gini coefficient of the assigned task
-counts $\mathbf{n}$, flight distances $\mathbf{d}$, or execution durations
+counts $\mathbf{n}$, flight distances $\boldsymbol{\ell}$, or execution durations
 $\boldsymbol{\tau}$.
 
 Because no perturbations are introduced in the simple and normal settings,
 their applicable metric set $\mathcal{K}_d$ contains completion, response,
 mission time, resource pressure, and coordination; for the hard and expert
 settings, it additionally contains event stability.
-For each episode $i$ at difficulty level $d$, the score combines the weighted
-aggregation of its applicable metrics with a bounded difficulty reward. The
-reported score for level $d$ is the mean across its $N_d$ episodes:
+For each episode $i$ at difficulty level $d$, the score is the weighted
+aggregation of its applicable metrics. The reported score for level $d$ is the
+mean across its $N_d$ episodes:
 \begin{equation}
 \begin{aligned}
 S_d
 &=\frac{1}{N_d}\sum_{i=1}^{N_d}
-\left[\sum_{k\in\mathcal{K}_d}w_{k,d}s_{i,k}
-\frac{1+\lambda\rho_i}{1+\lambda}\right],\\
+\sum_{k\in\mathcal{K}_d}w_{k,d}s_{i,k},\\
 w_{k,d}&\geq0,\qquad
 \sum_{k\in\mathcal{K}_d}w_{k,d}=1.
 \end{aligned}
 \label{eq:final-evaluation-score}
 \end{equation}
 Here, $s_{i,k}$ is the score of episode $i$ for metric $k$, and $w_{k,d}$
-is its normalized weight at difficulty level $d$. The coefficient
-$\rho_i\in[0,1]$ represents episode difficulty, while $\lambda\geq0$ controls
-the difficulty reward; division by $1+\lambda$ keeps $S_d$ within $[0,100]$.
+is its normalized weight at difficulty level $d$. Because the component scores
+lie within $[0,100]$ and the weights sum to one, $S_d$ also lies within $[0,100]$.
 The component scores support diagnostic analysis, whereas $S_d$ provides the
 overall comparison score for level $d$.
 
 Together, the staged episode difficulty and decomposed metrics provide a common
-basis for testing the three questions examined next: whether CLoMA-UWR sustains
-high-level closed-loop decision making, which mechanisms
+basis for testing the three questions examined next: whether CLoMC-UWR sustains
+high-level closed-loop mission coordination, which mechanisms
 matter as operational pressure increases, and how much capability for
 resource-constrained mission planning can be retained by a compact planner.
 
