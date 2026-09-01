@@ -3,12 +3,12 @@
 \label{sec:introduction}
 
 \IEEEPARstart{W}{ildfires} threaten ecosystems, infrastructure, and human safety
-\cite{bowman2020wildfire}. Unmanned aerial vehicles (UAVs) can rapidly observe
+\cite{xu2020wildfires}. Unmanned aerial vehicles (UAVs) can rapidly observe
 hazardous and inaccessible areas through flexible aerial sensing
-\cite{allan2022remote}. Effective response, however, requires more than
+\cite{akhloufi2021wildlanduav}. Effective response, however, requires more than
 observation: aerial evidence must be converted into task zones, assigned across
 a resource-limited fleet, and reconsidered as the fire or UAV state changes.
-Multi-UAV wildfire response is therefore a closed-loop mission-coordination
+Multi-UAV wildfire rescue is therefore a closed-loop mission-coordination
 problem rather than an isolated perception, navigation, or allocation task.
 
 An initial mission must be feasible for the current fleet. Task priorities must
@@ -26,10 +26,10 @@ disaster-response and wildfire studies cover sensing, fire perception,
 exploration, coverage, cooperation, and task planning
 \cite{erdelj2017help,akhloufi2021wildlanduav,
 boroujeni2024aiwildfiresurvey}. Representative advances include thermal--RGB
-fire detection \cite{yuan2021uavfire}, autonomous disaster exploration and
-mapping \cite{popovic2021uavdisaster}, coverage planning
-\cite{yu2022coverageuav}, and multi-UAV task allocation and search-and-rescue
-coordination \cite{yang2023multiagentuav,baker2016uavsar}. Integrated
+fire detection \cite{shamsoshoara2021flame}, autonomous exploration and
+mapping \cite{popovic2017uavmapping}, coverage planning
+\cite{cabreira2019coverageuav}, and multi-UAV task allocation and search-and-rescue
+coordination \cite{bevacqua2015multidrone,baker2016uavsar}. Integrated
 systems have also coupled wildfire situation assessment and spread prediction
 with multi-UAV observation planning \cite{bailonruiz2022realtimewildfire}, and
 dynamic wildfire models have informed cooperative coverage and tracking under
@@ -75,8 +75,7 @@ evaluation setting in which initial mission planning, plan validation,
 experience retrieval, and runtime plan repair share the same resource bounds, perturbation
 conditions, and mission-level metrics.
 
-To meet these requirements, we develop CLoMC-UWR (Closed-Loop Mission
-Coordination System for UAV Wildfire Response), an LLM-based closed-loop
+To meet these requirements, we develop CLoMC-UWR, an LLM-based closed-loop
 mission-coordination system. Vision Analysis converts aerial observations into
 fire points and task zones, and Mission Planning maps the structured fire
 situation, UAV operational states, and mission constraints into an initial
@@ -99,7 +98,7 @@ planning behavior to a compact planner with lower overhead.
 
 The main contributions of this work are summarized as follows:
 \begin{enumerate}[leftmargin=1.6em,itemsep=2pt,topsep=3pt]
-    \item We formulate resource-constrained multi-UAV wildfire response as a
+    \item We formulate resource-constrained multi-UAV wildfire rescue as a
     closed-loop mission-coordination problem and develop CLoMC-UWR, which
     connects aerial fire-situation understanding, initial mission planning,
     explicit plan validation, experience retrieval, and runtime plan repair

@@ -189,7 +189,7 @@ their different average score contributions.
     \centering
     \includegraphics[width=\textwidth]{figures/planner-score-efficiency-comparison.png}
     \caption{Score--efficiency comparison of the three planners: (a) total
-    score, (b) planning duration, and (c) planning-token usage. Lower values are
+    score, (b) planning time, and (c) planning token usage. Lower values are
     better in (b) and (c).}
     \label{fig:planner-score-efficiency}
 \end{figure*}
@@ -215,7 +215,7 @@ resource-management behavior to the compact planner.
 
 The fine-tuned planner also reduces planning overhead under the evaluated
 deployment setting. Its mean planning time across the two levels is 14.01~s,
-compared with 37.50~s for Gemini~3.1~Pro, while its mean planning-token usage
+compared with 37.50~s for Gemini~3.1~Pro, while its mean planning token usage
 falls from 13,353 to 3,593. Figure~\ref{fig:planner-score-efficiency} summarizes
 this performance--efficiency trade-off. This evidence is limited to initial
 planning on the evaluated simple and normal episodes; it does not establish how

@@ -45,11 +45,11 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 \markboth{IEEE Transactions on Industrial Informatics, Vol. XX, No. XX, 2026}
-{Author One \MakeLowercase{\textit{et al.}}: CLoMC-UWR: Automating Multi-UAV Wildfire Response via an LLM-Based Closed-Loop Mission Coordination System}
+{Author One \MakeLowercase{\textit{et al.}}: CLoMC-UWR: Automated Multi-UAV Wildfire Rescue via an LLM-Based Closed-Loop Mission Coordination System}
 
 \begin{document}
 
-\title{CLoMC-UWR: Automating Multi-UAV Wildfire Response via an LLM-Based Closed-Loop Mission Coordination System}
+\title{CLoMC-UWR: Automated Multi-UAV Wildfire Rescue via an LLM-Based Closed-Loop Mission Coordination System}
 
 \author{Author One and Author Two%
 \thanks{Manuscript received Month XX, 2026; revised Month XX, 2026.}%
@@ -59,16 +59,20 @@ Postal Code, Country (e-mail: author@example.com).}}
 \maketitle
 
 \begin{abstract}
-Reliable multi-UAV wildfire response requires closed-loop mission coordination that
-converts uncertain aerial observations into executable fleet plans and
-preserves mission continuity under runtime perturbations.
-Existing UAV studies address these capabilities using different task inputs,
-state representations, action spaces, resource assumptions, and evaluation
-protocols, limiting direct assessment of initial mission planning and runtime plan repair
-under common operating conditions. We therefore develop CLoMC-UWR, an LLM-based closed-loop mission
-coordination system for multi-UAV wildfire response. CLoMC-UWR transforms aerial
-observations into initial mission plans through Vision Analysis and Mission Planning,
-audits candidate plans through Validation, retrieves relevant prior mission records
+Wildfire rescue is time-critical, yet affected areas are often hazardous and
+difficult to access. Multi-UAV systems can provide rapid aerial observation
+and intervention, but their effective deployment requires dynamic mission
+coordination as the fire situation, UAV operational states, and mission
+constraints evolve.
+Existing UAV studies address these capabilities under different task
+definitions and evaluation protocols, leaving unanswered whether a single
+coordination system can generate a feasible initial multi-UAV mission plan and repair
+it after runtime perturbations within the same operating conditions. We
+therefore develop CLoMC-UWR (Closed-Loop Mission Coordination System for UAV
+Wildfire Rescue), an LLM-based closed-loop mission
+coordination system for multi-UAV wildfire rescue. CLoMC-UWR transforms aerial
+observations into an initial mission plan through Vision Analysis and Mission Planning,
+audits the candidate plan through Validation, retrieves relevant prior mission records
 through Memory to inform subsequent planning, and invokes Runtime Replanning
 after runtime perturbations. A
 real-UAV-informed AirSim suite evaluates it across four difficulty levels with
@@ -77,16 +81,16 @@ four downstream foundation-model configurations, CLoMC-UWR outperforms an
 Optimization-Based Planner in task completion and execution quality under hard
 and expert conditions. Controlled ablations identify the condition-dependent
 roles of Validation, Memory, and Runtime Replanning. On simple and normal episodes, a
-fine-tuned Qwen3-8B planner retains 98.24\% of the Gemini~3.1~Pro teacher
-planner's average score while reducing mean planning time from 37.50 to
-14.01~s and mean planning-token usage from 13,353 to 3,593. These results
+fine-tuned Qwen3-8B planner retains over 98\% of the Gemini~3.1~Pro teacher
+planner's average score while reducing mean planning time by approximately
+63\% and mean planning token usage by approximately 73\%. These results
 demonstrate the effectiveness of CLoMC-UWR for adaptive multi-UAV wildfire
-response.
+rescue.
 \end{abstract}
 
 \begin{IEEEkeywords}
 Closed-loop mission coordination, large language models, multi-UAV systems,
-real-to-simulation evaluation, wildfire response.
+real-to-simulation evaluation, wildfire rescue.
 \end{IEEEkeywords}
 
 \input{sections/01-introduction}
